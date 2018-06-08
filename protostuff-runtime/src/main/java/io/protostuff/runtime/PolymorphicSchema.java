@@ -32,55 +32,47 @@ import io.protostuff.Pipe;
 import io.protostuff.Schema;
 
 /**
- * Used when the type is either polymorphic or too complex. Unlike DerivativeSchema, this is designed to have no concept
- * of merging.
- * 
+ * 当类型为多态或过于复杂时使用。不同于DerivativeSchema，它是设计出来不包含merge概念的Schema
+ *
  * @author David Yu
  * @created Apr 30, 2012
  */
-public abstract class PolymorphicSchema implements Schema<Object>
-{
+public abstract class PolymorphicSchema implements Schema<Object> {
 
     /**
      * The handler who's job is to set the value to the owner.
      */
-    public interface Handler
-    {
+    public interface Handler {
         public void setValue(Object value, Object owner);
     }
 
     /**
      * A factory which creates a schema with the handler connected to it.
      */
-    public interface Factory
-    {
+    public interface Factory {
         public PolymorphicSchema newSchema(Class<?> typeClass,
-                IdStrategy strategy, Handler handler);
+                                           IdStrategy strategy, Handler handler);
     }
 
     public final IdStrategy strategy;
 
-    public PolymorphicSchema(IdStrategy strategy)
-    {
+    public PolymorphicSchema(IdStrategy strategy) {
         this.strategy = strategy;
     }
 
     @Override
-    public boolean isInitialized(Object message)
-    {
+    public boolean isInitialized(Object message) {
         return true;
     }
 
     @Override
-    public Object newMessage()
-    {
+    public Object newMessage() {
         // cannot instantiate because the type is dynamic.
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Class<? super Object> typeClass()
-    {
+    public Class<? super Object> typeClass() {
         return Object.class;
     }
 

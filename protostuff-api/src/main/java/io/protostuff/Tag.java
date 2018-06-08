@@ -35,19 +35,18 @@ import java.lang.annotation.Target;
 
 /**
  * A field annotation to configure the field number explicitly.
- * 
+ *
  * @author Brice Jaglin
  * @author David Yu
  * @created Mar 30, 2012
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Tag
-{
+public @interface Tag {
     int value();
 
     /**
-     * Overrides the field name (useful for non-binary formats like json/xml/yaml). Optional.
+     * 别名-覆盖字段名
      */
     String alias() default "";
 

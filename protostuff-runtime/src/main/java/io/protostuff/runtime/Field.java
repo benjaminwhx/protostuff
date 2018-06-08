@@ -9,10 +9,9 @@ import io.protostuff.Tag;
 import io.protostuff.WireFormat;
 
 /**
- * Represents a field of a message/pojo.
+ * 用来代表序列化对象的字段
  */
-public abstract class Field<T>
-{
+public abstract class Field<T> {
     public final WireFormat.FieldType type;
     public final int number;
     public final String name;
@@ -22,8 +21,7 @@ public abstract class Field<T>
     // public final Tag tag;
 
     public Field(WireFormat.FieldType type, int number, String name, boolean repeated,
-            Tag tag)
-    {
+                 Tag tag) {
         this.type = type;
         this.number = number;
         this.name = name;
@@ -32,8 +30,7 @@ public abstract class Field<T>
         // this.tag = tag;
     }
 
-    public Field(WireFormat.FieldType type, int number, String name, Tag tag)
-    {
+    public Field(WireFormat.FieldType type, int number, String name, Tag tag) {
         this(type, number, name, false, tag);
     }
 
@@ -50,8 +47,8 @@ public abstract class Field<T>
             throws IOException;
 
     /**
-     * Transfer the input field to the output field.
+     * 从input中传输字段到output
      */
     protected abstract void transfer(Pipe pipe, Input input, Output output,
-            boolean repeated) throws IOException;
+                                     boolean repeated) throws IOException;
 }

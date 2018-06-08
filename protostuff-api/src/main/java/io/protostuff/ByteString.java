@@ -53,40 +53,35 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
- * Immutable array of bytes.
- * 
+ * 不可变的byte数组
+ *
  * @author crazybob@google.com Bob Lee
  * @author kenton@google.com Kenton Varda
  * @author David Yu
  */
-public final class ByteString
-{
+public final class ByteString {
     // START EXTRA
     // internal package access to avoid double memory allocation
-    static ByteString wrap(byte[] bytes)
-    {
+    static ByteString wrap(byte[] bytes) {
         return new ByteString(bytes);
     }
 
     // internal package access to avoid double memory allocation
-    byte[] getBytes()
-    {
+    byte[] getBytes() {
         return bytes;
     }
 
     /**
      * Writes the bytes to the {@link OutputStream}.
      */
-    public static void writeTo(OutputStream out, ByteString bs) throws IOException
-    {
+    public static void writeTo(OutputStream out, ByteString bs) throws IOException {
         out.write(bs.bytes);
     }
 
     /**
      * Writes the bytes to the {@link DataOutput}.
      */
-    public static void writeTo(DataOutput out, ByteString bs) throws IOException
-    {
+    public static void writeTo(DataOutput out, ByteString bs) throws IOException {
         out.write(bs.bytes);
     }
 
@@ -94,14 +89,12 @@ public final class ByteString
      * Writes the bytes to the {@link Output}.
      */
     public static void writeTo(Output output, ByteString bs, int fieldNumber,
-            boolean repeated) throws IOException
-    {
+                               boolean repeated) throws IOException {
         output.writeByteArray(fieldNumber, bs.bytes, repeated);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return String.format("<ByteString@%s size=%d>",
                 Integer.toHexString(System.identityHashCode(this)), size());
     }
@@ -109,35 +102,30 @@ public final class ByteString
     // END EXTRA
     private final byte[] bytes;
 
-    private ByteString(final byte[] bytes)
-    {
+    private ByteString(final byte[] bytes) {
         this.bytes = bytes;
     }
 
     /**
      * Gets the byte at the given index.
-     * 
-     * @throws ArrayIndexOutOfBoundsException
-     *             {@code index} is &lt; 0 or &gt;= size
+     *
+     * @throws ArrayIndexOutOfBoundsException {@code index} is &lt; 0 or &gt;= size
      */
-    public byte byteAt(final int index)
-    {
+    public byte byteAt(final int index) {
         return bytes[index];
     }
 
     /**
      * Gets the number of bytes.
      */
-    public int size()
-    {
+    public int size() {
         return bytes.length;
     }
 
     /**
      * Returns {@code true} if the size is {@code 0}, {@code false} otherwise.
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return bytes.length == 0;
     }
 
@@ -163,8 +151,7 @@ public final class ByteString
      * Copies the given bytes into a {@code ByteString}.
      */
     public static ByteString copyFrom(final byte[] bytes, final int offset,
-            final int size)
-    {
+                                      final int size) {
         final byte[] copy = new byte[size];
         System.arraycopy(bytes, offset, copy, 0, size);
         return new ByteString(copy);
@@ -173,8 +160,7 @@ public final class ByteString
     /**
      * Copies the given bytes into a {@code ByteString}.
      */
-    public static ByteString copyFrom(final byte[] bytes)
-    {
+    public static ByteString copyFrom(final byte[] bytes) {
         return copyFrom(bytes, 0, bytes.length);
     }
 
@@ -182,14 +168,10 @@ public final class ByteString
      * Encodes {@code text} into a sequence of bytes using the named charset and returns the result as a
      * {@code ByteString}.
      */
-    public static ByteString copyFrom(final String text, final String charsetName)
-    {
-        try
-        {
+    public static ByteString copyFrom(final String text, final String charsetName) {
+        try {
             return new ByteString(text.getBytes(charsetName));
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(charsetName + " not supported?", e);
         }
     }
@@ -197,8 +179,7 @@ public final class ByteString
     /**
      * Encodes {@code text} into a sequence of UTF-8 bytes and returns the result as a {@code ByteString}.
      */
-    public static ByteString copyFromUtf8(final String text)
-    {
+    public static ByteString copyFromUtf8(final String text) {
         return new ByteString(STRING.ser(text));
         /*
          * @try { return new ByteString(text.getBytes("UTF-8")); } catch (UnsupportedEncodingException e) { throw new
@@ -211,41 +192,32 @@ public final class ByteString
 
     /**
      * Copies bytes into a buffer at the given offset.
-     * 
-     * @param target
-     *            buffer to copy into
-     * @param offset
-     *            in the target buffer
+     *
+     * @param target buffer to copy into
+     * @param offset in the target buffer
      */
-    public void copyTo(final byte[] target, final int offset)
-    {
+    public void copyTo(final byte[] target, final int offset) {
         System.arraycopy(bytes, 0, target, offset, bytes.length);
     }
 
     /**
      * Copies bytes into a buffer.
-     * 
-     * @param target
-     *            buffer to copy into
-     * @param sourceOffset
-     *            offset within these bytes
-     * @param targetOffset
-     *            offset within the target buffer
-     * @param size
-     *            number of bytes to copy
+     *
+     * @param target       buffer to copy into
+     * @param sourceOffset offset within these bytes
+     * @param targetOffset offset within the target buffer
+     * @param size         number of bytes to copy
      */
     public void copyTo(final byte[] target, final int sourceOffset,
-            final int targetOffset,
-            final int size)
-    {
+                       final int targetOffset,
+                       final int size) {
         System.arraycopy(bytes, sourceOffset, target, targetOffset, size);
     }
 
     /**
      * Copies bytes to a {@code byte[]}.
      */
-    public byte[] toByteArray()
-    {
+    public byte[] toByteArray() {
         final int size = bytes.length;
         final byte[] copy = new byte[size];
         System.arraycopy(bytes, 0, copy, 0, size);
@@ -255,8 +227,7 @@ public final class ByteString
     /**
      * Constructs a new read-only {@code java.nio.ByteBuffer} with the same backing byte array.
      */
-    public ByteBuffer asReadOnlyByteBuffer()
-    {
+    public ByteBuffer asReadOnlyByteBuffer() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
         return byteBuffer.asReadOnlyBuffer();
     }
@@ -272,8 +243,7 @@ public final class ByteString
     /**
      * Constructs a new {@code String} by decoding the bytes as UTF-8.
      */
-    public String toStringUtf8()
-    {
+    public String toStringUtf8() {
         return STRING.deser(bytes);
         /*
          * @try { return new String(bytes, "UTF-8"); } catch (UnsupportedEncodingException e) { throw new
@@ -285,38 +255,31 @@ public final class ByteString
     // equals() and hashCode()
 
     @Override
-    public boolean equals(final Object o)
-    {
+    public boolean equals(final Object o) {
         return o == this || (o instanceof ByteString && equals(this, (ByteString) o, false));
     }
 
     /**
      * Returns true if the contents of both match.
      */
-    public static boolean equals(ByteString bs, ByteString other, boolean checkHash)
-    {
+    public static boolean equals(ByteString bs, ByteString other, boolean checkHash) {
         final int size = bs.bytes.length;
-        if (size != other.bytes.length)
-        {
+        if (size != other.bytes.length) {
             return false;
         }
 
-        if (checkHash)
-        {
+        if (checkHash) {
             // volatile reads
             final int h1 = bs.hash, h2 = other.hash;
-            if (h1 != 0 && h2 != 0 && h1 != h2)
-            {
+            if (h1 != 0 && h2 != 0 && h1 != h2) {
                 return false;
             }
         }
 
         final byte[] thisBytes = bs.bytes;
         final byte[] otherBytes = other.bytes;
-        for (int i = 0; i < size; i++)
-        {
-            if (thisBytes[i] != otherBytes[i])
-            {
+        for (int i = 0; i < size; i++) {
+            if (thisBytes[i] != otherBytes[i]) {
                 return false;
             }
         }
@@ -327,24 +290,20 @@ public final class ByteString
     /**
      * Returns true if the contents of the internal array and the provided array match.
      */
-    public boolean equals(final byte[] data)
-    {
+    public boolean equals(final byte[] data) {
         return equals(data, 0, data.length);
     }
 
     /**
      * Returns true if the contents of the internal array and the provided array match.
      */
-    public boolean equals(final byte[] data, int offset, final int len)
-    {
+    public boolean equals(final byte[] data, int offset, final int len) {
         final byte[] bytes = this.bytes;
         if (len != bytes.length)
             return false;
 
-        for (int i = 0; i < len;)
-        {
-            if (bytes[i++] != data[offset++])
-            {
+        for (int i = 0; i < len; ) {
+            if (bytes[i++] != data[offset++]) {
                 return false;
             }
         }
@@ -355,22 +314,18 @@ public final class ByteString
     private volatile int hash = 0;
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int h = hash;
 
-        if (h == 0)
-        {
+        if (h == 0) {
             final byte[] thisBytes = bytes;
             final int size = bytes.length;
 
             h = size;
-            for (int i = 0; i < size; i++)
-            {
+            for (int i = 0; i < size; i++) {
                 h = h * 31 + thisBytes[i];
             }
-            if (h == 0)
-            {
+            if (h == 0) {
                 h = 1;
             }
 
@@ -480,14 +435,10 @@ public final class ByteString
      * stringDefaultValue -- converts from the generated string to the string we actually want. The generated code calls
      * this automatically.
      */
-    public static String stringDefaultValue(String bytes)
-    {
-        try
-        {
+    public static String stringDefaultValue(String bytes) {
+        try {
             return new String(bytes.getBytes("ISO-8859-1"), "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             // This should never happen since all JVMs are required to implement
             // both of the above character sets.
             throw new IllegalStateException(
@@ -501,8 +452,7 @@ public final class ByteString
      * This is a lot like {@link #stringDefaultValue}, but for bytes fields. In this case we only need the second of the
      * two hacks -- allowing us to embed raw bytes as a string literal with ISO-8859-1 encoding.
      */
-    public static ByteString bytesDefaultValue(String bytes)
-    {
+    public static ByteString bytesDefaultValue(String bytes) {
         return new ByteString(byteArrayDefaultValue(bytes));
     }
 
@@ -512,14 +462,10 @@ public final class ByteString
      * This is a lot like {@link #stringDefaultValue}, but for bytes fields. In this case we only need the second of the
      * two hacks -- allowing us to embed raw bytes as a string literal with ISO-8859-1 encoding.
      */
-    public static byte[] byteArrayDefaultValue(String bytes)
-    {
-        try
-        {
+    public static byte[] byteArrayDefaultValue(String bytes) {
+        try {
             return bytes.getBytes("ISO-8859-1");
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             // This should never happen since all JVMs are required to implement
             // ISO-8859-1.
             throw new IllegalStateException(

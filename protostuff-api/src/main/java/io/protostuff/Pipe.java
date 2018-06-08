@@ -22,110 +22,94 @@ import java.io.IOException;
  * It is recommended to use pipe only to stream data coming from server-side services (e.g from your datastore/etc).
  * <p>
  * Incoming data from the interwebs should not be piped due to validation/security purposes.
- * 
+ *
  * @author David Yu
  * @created Oct 6, 2010
  */
-public abstract class Pipe
-{
+public abstract class Pipe {
 
     protected Input input;
     protected Output output;
 
     /**
-     * Resets this pipe for re-use.
+     * 重置管道以便重用
      */
-    protected Pipe reset()
-    {
+    protected Pipe reset() {
         output = null;
         input = null;
         return this;
     }
 
     /**
-     * Begin preliminary input processing.
+     * 开始准备处理input
      */
     protected abstract Input begin(Pipe.Schema<?> pipeSchema) throws IOException;
 
     /**
-     * End input processing.
-     * <p>
-     * If {@code cleanupOnly} is true, the io processing ended prematurely hence the underlying pipe should
-     * cleanup/close all resources that need to be.
+     * 结束处理input
+     * 如果cleanupOnly为true，仅仅需要清理或者关闭资源（意外结束）
      */
     protected abstract void end(Pipe.Schema<?> pipeSchema, Input input,
-            boolean cleanupOnly) throws IOException;
+                                boolean cleanupOnly) throws IOException;
 
     /**
-     * Schema for transferring data from a source ({@link Input}) to a different sink ({@link Output}).
+     * 从Input传输数据到Output的Schema
      */
-    public static abstract class Schema<T> implements io.protostuff.Schema<Pipe>
-    {
+    public static abstract class Schema<T> implements io.protostuff.Schema<Pipe> {
 
         public final io.protostuff.Schema<T> wrappedSchema;
 
-        public Schema(io.protostuff.Schema<T> wrappedSchema)
-        {
+        public Schema(io.protostuff.Schema<T> wrappedSchema) {
             this.wrappedSchema = wrappedSchema;
         }
 
         @Override
-        public String getFieldName(int number)
-        {
+        public String getFieldName(int number) {
             return wrappedSchema.getFieldName(number);
         }
 
         @Override
-        public int getFieldNumber(String name)
-        {
+        public int getFieldNumber(String name) {
             return wrappedSchema.getFieldNumber(name);
         }
 
         /**
-         * Always returns true since we're just transferring data.
+         * 总是返回true，因为我们只是传输数据。
          */
         @Override
-        public boolean isInitialized(Pipe message)
-        {
+        public boolean isInitialized(Pipe message) {
             return true;
         }
 
         @Override
-        public String messageFullName()
-        {
+        public String messageFullName() {
             return wrappedSchema.messageFullName();
         }
 
         @Override
-        public String messageName()
-        {
+        public String messageName() {
             return wrappedSchema.messageName();
         }
 
         @Override
-        public Pipe newMessage()
-        {
+        public Pipe newMessage() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Class<Pipe> typeClass()
-        {
+        public Class<Pipe> typeClass() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public final void writeTo(final Output output, final Pipe pipe) throws IOException
-        {
-            if (pipe.output == null)
-            {
+        public final void writeTo(final Output output, final Pipe pipe) throws IOException {
+            if (pipe.output == null) {
                 pipe.output = output;
 
                 // begin message pipe
                 final Input input = pipe.begin(this);
 
-                if (input == null)
-                {
+                if (input == null) {
                     // empty message pipe.
                     pipe.output = null;
                     pipe.end(this, input, true);
@@ -135,13 +119,10 @@ public abstract class Pipe
                 pipe.input = input;
 
                 boolean transferComplete = false;
-                try
-                {
+                try {
                     transfer(pipe, input, output);
                     transferComplete = true;
-                }
-                finally
-                {
+                } finally {
                     pipe.end(this, input, !transferComplete);
                     // pipe.input = null;
                     // pipe.output = null;
@@ -155,13 +136,12 @@ public abstract class Pipe
         }
 
         @Override
-        public final void mergeFrom(final Input input, final Pipe pipe) throws IOException
-        {
+        public final void mergeFrom(final Input input, final Pipe pipe) throws IOException {
             transfer(pipe, input, pipe.output);
         }
 
         /**
-         * Transfer data from the {@link Input} to the {@link Output}.
+         * 从Input向Output传输数据
          */
         protected abstract void transfer(Pipe pipe, Input input, Output output)
                 throws IOException;
@@ -169,11 +149,10 @@ public abstract class Pipe
     }
 
     /**
-     * This should not be called directly by applications.
+     * 这不应该由应用程序直接调用。
      */
     public static <T> void transferDirect(Pipe.Schema<T> pipeSchema, Pipe pipe,
-            Input input, Output output) throws IOException
-    {
+                                          Input input, Output output) throws IOException {
         pipeSchema.transfer(pipe, input, output);
     }
 

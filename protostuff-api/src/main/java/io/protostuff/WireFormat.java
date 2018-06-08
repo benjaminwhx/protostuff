@@ -50,17 +50,19 @@ package io.protostuff;
  * directly.
  * <p>
  * This class contains constants and helper functions useful for dealing with the Protocol Buffer wire format.
- * 
+ *
  * @author kenton@google.com Kenton Varda
  * @author David Yu
  */
-public final class WireFormat
-{
+public final class WireFormat {
     // Do not allow instantiation.
-    private WireFormat()
-    {
+    private WireFormat() {
     }
 
+    /**
+     * wire type 范围 0-7
+     * 0000 - 0111
+     */
     public static final int WIRETYPE_VARINT = 0;
     public static final int WIRETYPE_FIXED64 = 1;
     public static final int WIRETYPE_LENGTH_DELIMITED = 2;
@@ -70,38 +72,37 @@ public final class WireFormat
     public static final int WIRETYPE_REFERENCE = 6;
     public static final int WIRETYPE_TAIL_DELIMITER = 7;
 
+    // tag类型右边3位是wire type，左边是filedNumber
     static final int TAG_TYPE_BITS = 3;
     static final int TAG_TYPE_MASK = (1 << TAG_TYPE_BITS) - 1;
 
     /**
      * Given a tag value, determines the wire type (the lower 3 bits).
      */
-    public static int getTagWireType(final int tag)
-    {
+    public static int getTagWireType(final int tag) {
         return tag & TAG_TYPE_MASK;
     }
 
     /**
      * Given a tag value, determines the field number (the upper 29 bits).
      */
-    public static int getTagFieldNumber(final int tag)
-    {
+    public static int getTagFieldNumber(final int tag) {
         return tag >>> TAG_TYPE_BITS;
     }
 
     /**
-     * Makes a tag value given a field number and wire type.
+     * 生成tag值
+     * 比如fieldNumber = 1，wireType = 7
+     * 返回：1111
      */
-    public static int makeTag(final int fieldNumber, final int wireType)
-    {
+    public static int makeTag(final int fieldNumber, final int wireType) {
         return (fieldNumber << TAG_TYPE_BITS) | wireType;
     }
 
     /**
      * This is here to support runtime schemas.
      */
-    public enum JavaType
-    {
+    public enum JavaType {
         INT(0),
         LONG(0L),
         FLOAT(0F),
@@ -112,16 +113,14 @@ public final class WireFormat
         ENUM(null),
         MESSAGE(null);
 
-        JavaType(final Object defaultDefault)
-        {
+        JavaType(final Object defaultDefault) {
             this.defaultDefault = defaultDefault;
         }
 
         /**
          * The default default value for fields of this type, if it's a primitive type.
          */
-        Object getDefaultDefault()
-        {
+        Object getDefaultDefault() {
             return defaultDefault;
         }
 
@@ -131,8 +130,7 @@ public final class WireFormat
     /**
      * This is here to support runtime schemas.
      */
-    public enum FieldType
-    {
+    public enum FieldType {
         DOUBLE(JavaType.DOUBLE, WIRETYPE_FIXED64),
         FLOAT(JavaType.FLOAT, WIRETYPE_FIXED32),
         INT64(JavaType.LONG, WIRETYPE_VARINT),
@@ -141,35 +139,27 @@ public final class WireFormat
         FIXED64(JavaType.LONG, WIRETYPE_FIXED64),
         FIXED32(JavaType.INT, WIRETYPE_FIXED32),
         BOOL(JavaType.BOOLEAN, WIRETYPE_VARINT),
-        STRING(JavaType.STRING, WIRETYPE_LENGTH_DELIMITED)
-        {
+        STRING(JavaType.STRING, WIRETYPE_LENGTH_DELIMITED) {
             @Override
-            public boolean isPackable()
-            {
+            public boolean isPackable() {
                 return false;
             }
         },
-        GROUP(JavaType.MESSAGE, WIRETYPE_START_GROUP)
-        {
+        GROUP(JavaType.MESSAGE, WIRETYPE_START_GROUP) {
             @Override
-            public boolean isPackable()
-            {
+            public boolean isPackable() {
                 return false;
             }
         },
-        MESSAGE(JavaType.MESSAGE, WIRETYPE_LENGTH_DELIMITED)
-        {
+        MESSAGE(JavaType.MESSAGE, WIRETYPE_LENGTH_DELIMITED) {
             @Override
-            public boolean isPackable()
-            {
+            public boolean isPackable() {
                 return false;
             }
         },
-        BYTES(JavaType.BYTE_STRING, WIRETYPE_LENGTH_DELIMITED)
-        {
+        BYTES(JavaType.BYTE_STRING, WIRETYPE_LENGTH_DELIMITED) {
             @Override
-            public boolean isPackable()
-            {
+            public boolean isPackable() {
                 return false;
             }
         },
@@ -180,8 +170,7 @@ public final class WireFormat
         SINT32(JavaType.INT, WIRETYPE_VARINT),
         SINT64(JavaType.LONG, WIRETYPE_VARINT);
 
-        FieldType(final JavaType javaType, final int wireType)
-        {
+        FieldType(final JavaType javaType, final int wireType) {
             this.javaType = javaType;
             this.wireType = wireType;
         }
@@ -189,18 +178,15 @@ public final class WireFormat
         public final JavaType javaType;
         public final int wireType;
 
-        public JavaType getJavaType()
-        {
+        public JavaType getJavaType() {
             return javaType;
         }
 
-        public int getWireType()
-        {
+        public int getWireType() {
             return wireType;
         }
 
-        public boolean isPackable()
-        {
+        public boolean isPackable() {
             return true;
         }
     }

@@ -36,8 +36,7 @@ import com.fasterxml.jackson.core.JsonToken;
  * @author David Yu
  * @created Nov 20, 2009
  */
-public final class JsonInput implements Input
-{
+public final class JsonInput implements Input {
 
     /**
      * The wrapped json parser.
@@ -53,13 +52,11 @@ public final class JsonInput implements Input
     private String lastName;
     private int lastNumber;
 
-    public JsonInput(JsonParser parser)
-    {
+    public JsonInput(JsonParser parser) {
         this(parser, false);
     }
 
-    public JsonInput(JsonParser parser, boolean numeric)
-    {
+    public JsonInput(JsonParser parser, boolean numeric) {
         this.parser = parser;
         this.numeric = numeric;
     }
@@ -67,32 +64,28 @@ public final class JsonInput implements Input
     /**
      * Returns whether the incoming messages' field names are numeric.
      */
-    public boolean isNumeric()
-    {
+    public boolean isNumeric() {
         return numeric;
     }
 
     /**
      * Gets the last field number read.
      */
-    public int getLastNumber()
-    {
+    public int getLastNumber() {
         return lastNumber;
     }
 
     /**
      * Returns true if the last read field was a repeated field.
      */
-    public boolean isLastRepeated()
-    {
+    public boolean isLastRepeated() {
         return lastRepeated;
     }
 
     /**
      * Resets this input.
      */
-    public JsonInput reset()
-    {
+    public JsonInput reset() {
         lastRepeated = false;
         lastName = null;
         lastNumber = 0;
@@ -100,41 +93,32 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public <T> void handleUnknownField(int fieldNumber, Schema<T> schema) throws IOException
-    {
-        if (parser.getCurrentToken().isScalarValue())
-        {
+    public <T> void handleUnknownField(int fieldNumber, Schema<T> schema) throws IOException {
+        if (parser.getCurrentToken().isScalarValue()) {
             // numeric json
             // we can skip this unknown field
-            if (lastRepeated)
-            {
+            if (lastRepeated) {
                 lastRepeated = false;
                 // skip the scalar elements
                 while (parser.nextToken() != END_ARRAY)
                     ;
             }
             return;
-        }
-        else
-        {
+        } else {
             skipField(parser);
         }
     }
 
     @Override
-    public <T> int readFieldNumber(final Schema<T> schema) throws IOException
-    {
-        if (lastRepeated)
-        {
-            if (parser.getCurrentToken() == VALUE_NULL)
-            {
+    public <T> int readFieldNumber(final Schema<T> schema) throws IOException {
+        if (lastRepeated) {
+            if (parser.getCurrentToken() == VALUE_NULL) {
                 // skip null elements
                 JsonToken jt;
                 while (VALUE_NULL == (jt = parser.nextToken()))
                     ;
 
-                if (jt == END_ARRAY)
-                {
+                if (jt == END_ARRAY) {
                     // remaining elements were all null
 
                     // move to the next field
@@ -150,15 +134,12 @@ public final class JsonInput implements Input
     }
 
     private <T> int readFieldNumber(final Schema<T> schema, final JsonParser parser)
-            throws IOException
-    {
-        for (; ; )
-        {
+            throws IOException {
+        for (; ; ) {
             if (parser.nextToken() == END_OBJECT)
                 return 0;
 
-            if (parser.getCurrentToken() != FIELD_NAME)
-            {
+            if (parser.getCurrentToken() != FIELD_NAME) {
                 throw new JsonInputException("Expected token: $field: but was " +
                         parser.getCurrentToken() + " on message " + schema.messageFullName());
             }
@@ -169,43 +150,36 @@ public final class JsonInput implements Input
             parser.nextToken();
 
             // skip null value
-            if (parser.getCurrentToken() == VALUE_NULL)
-            {
+            if (parser.getCurrentToken() == VALUE_NULL) {
                 continue;
             }
 
             int number = numeric ? Integer.parseInt(name) : schema.getFieldNumber(name);
 
-            if (number == 0)
-            {
+            if (number == 0) {
                 // we can skip this unknown field
-                if (!parser.getCurrentToken().isScalarValue())
-                {
+                if (!parser.getCurrentToken().isScalarValue()) {
                     skipField(parser);
                 }
                 continue;
             }
 
-            if (parser.getCurrentToken() == START_ARRAY)
-            {
+            if (parser.getCurrentToken() == START_ARRAY) {
                 JsonToken jt = parser.nextToken();
 
                 // if empty array, read the next field
-                if (jt == END_ARRAY)
-                {
+                if (jt == END_ARRAY) {
                     continue;
                 }
 
-                if (jt == VALUE_NULL)
-                {
+                if (jt == VALUE_NULL) {
                     // skip null elements
                     //noinspection StatementWithEmptyBody
                     while (VALUE_NULL == (jt = parser.nextToken()))
                         ;
 
                     // all elements were null.
-                    if (jt == END_ARRAY)
-                    {
+                    if (jt == END_ARRAY) {
                         continue;
                     }
                 }
@@ -225,8 +199,7 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public boolean readBool() throws IOException
-    {
+    public boolean readBool() throws IOException {
         final JsonToken jt = parser.getCurrentToken();
         if (lastRepeated && parser.nextToken() == END_ARRAY)
             lastRepeated = false;
@@ -240,8 +213,7 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public byte[] readByteArray() throws IOException
-    {
+    public byte[] readByteArray() throws IOException {
         final byte[] value = parser.getBinaryValue();
 
         if (lastRepeated && parser.nextToken() == END_ARRAY)
@@ -251,14 +223,12 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public ByteString readBytes() throws IOException
-    {
+    public ByteString readBytes() throws IOException {
         return ByteString.wrap(readByteArray());
     }
 
     @Override
-    public void readBytes(final ByteBuffer bb) throws IOException
-    {
+    public void readBytes(final ByteBuffer bb) throws IOException {
         bb.put(parser.getBinaryValue());
 
         if (lastRepeated && parser.nextToken() == END_ARRAY)
@@ -266,17 +236,15 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public double readDouble() throws IOException
-    {
+    public double readDouble() throws IOException {
         final double value;
-        if (parser.getCurrentToken() == VALUE_STRING)
-        {
+        if (parser.getCurrentToken() == VALUE_STRING) {
             final String textValue = parser.getText();
 
             if ("Infinity".equals(textValue))
                 value = Double.POSITIVE_INFINITY;
             else if ("-Infinity".equals(textValue))
-                    value = Double.NEGATIVE_INFINITY;
+                value = Double.NEGATIVE_INFINITY;
             else if ("NaN".equals(textValue))
                 value = Double.NaN;
             else
@@ -291,53 +259,44 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public int readEnum() throws IOException
-    {
+    public int readEnum() throws IOException {
         return readInt32();
     }
 
     @Override
-    public int readFixed32() throws IOException
-    {
+    public int readFixed32() throws IOException {
         String rawValue = parser.getText();
-        if (lastRepeated && parser.nextToken() == END_ARRAY)
-        {
+        if (lastRepeated && parser.nextToken() == END_ARRAY) {
             lastRepeated = false;
         }
-        if (rawValue.startsWith("-"))
-        {
+        if (rawValue.startsWith("-")) {
             return Integer.parseInt(rawValue);
         }
         return UnsignedNumberUtil.parseUnsignedInt(rawValue);
     }
 
     @Override
-    public long readFixed64() throws IOException
-    {
+    public long readFixed64() throws IOException {
         String rawValue = parser.getText();
-        if (lastRepeated && parser.nextToken() == END_ARRAY)
-        {
+        if (lastRepeated && parser.nextToken() == END_ARRAY) {
             lastRepeated = false;
         }
-        if (rawValue.startsWith("-"))
-        {
+        if (rawValue.startsWith("-")) {
             return Long.parseLong(rawValue);
         }
         return UnsignedNumberUtil.parseUnsignedLong(rawValue);
     }
 
     @Override
-    public float readFloat() throws IOException
-    {
+    public float readFloat() throws IOException {
         final float value;
-        if (parser.getCurrentToken() == VALUE_STRING)
-        {
+        if (parser.getCurrentToken() == VALUE_STRING) {
             final String textValue = parser.getText();
 
             if ("Infinity".equals(textValue))
                 value = Float.POSITIVE_INFINITY;
             else if ("-Infinity".equals(textValue))
-                    value = Float.NEGATIVE_INFINITY;
+                value = Float.NEGATIVE_INFINITY;
             else if ("NaN".equals(textValue))
                 value = Float.NaN;
             else
@@ -352,8 +311,7 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public int readInt32() throws IOException
-    {
+    public int readInt32() throws IOException {
         final int value = parser.getIntValue();
 
         if (lastRepeated && parser.nextToken() == END_ARRAY)
@@ -363,8 +321,7 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public long readInt64() throws IOException
-    {
+    public long readInt64() throws IOException {
         final long value = parser.getLongValue();
 
         if (lastRepeated && parser.nextToken() == END_ARRAY)
@@ -374,32 +331,27 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public int readSFixed32() throws IOException
-    {
+    public int readSFixed32() throws IOException {
         return readInt32();
     }
 
     @Override
-    public long readSFixed64() throws IOException
-    {
+    public long readSFixed64() throws IOException {
         return readInt64();
     }
 
     @Override
-    public int readSInt32() throws IOException
-    {
+    public int readSInt32() throws IOException {
         return readInt32();
     }
 
     @Override
-    public long readSInt64() throws IOException
-    {
+    public long readSInt64() throws IOException {
         return readInt64();
     }
 
     @Override
-    public String readString() throws IOException
-    {
+    public String readString() throws IOException {
         if (parser.getCurrentToken() != VALUE_STRING)
             throw new JsonInputException("Expected token: string but was " + parser.getCurrentToken());
 
@@ -412,40 +364,32 @@ public final class JsonInput implements Input
     }
 
     @Override
-    public int readUInt32() throws IOException
-    {
+    public int readUInt32() throws IOException {
         String rawValue = parser.getText();
-        if (lastRepeated && parser.nextToken() == END_ARRAY)
-        {
+        if (lastRepeated && parser.nextToken() == END_ARRAY) {
             lastRepeated = false;
         }
-        if (rawValue.startsWith("-"))
-        {
+        if (rawValue.startsWith("-")) {
             return Integer.parseInt(rawValue);
         }
         return UnsignedNumberUtil.parseUnsignedInt(rawValue);
     }
 
     @Override
-    public long readUInt64() throws IOException
-    {
+    public long readUInt64() throws IOException {
         String rawValue = parser.getText();
-        if (lastRepeated && parser.nextToken() == END_ARRAY)
-        {
+        if (lastRepeated && parser.nextToken() == END_ARRAY) {
             lastRepeated = false;
         }
-        if (rawValue.startsWith("-"))
-        {
+        if (rawValue.startsWith("-")) {
             return Long.parseLong(rawValue);
         }
         return UnsignedNumberUtil.parseUnsignedLong(rawValue);
     }
 
     @Override
-    public <T> T mergeObject(T value, final Schema<T> schema) throws IOException
-    {
-        if (parser.getCurrentToken() != START_OBJECT)
-        {
+    public <T> T mergeObject(T value, final Schema<T> schema) throws IOException {
+        if (parser.getCurrentToken() != START_OBJECT) {
             throw new JsonInputException("Expected token: { but was " +
                     parser.getCurrentToken() + " on " + lastName + " of message " +
                     schema.messageFullName());
@@ -463,8 +407,7 @@ public final class JsonInput implements Input
 
         schema.mergeFrom(this, value);
 
-        if (parser.getCurrentToken() != END_OBJECT)
-        {
+        if (parser.getCurrentToken() != END_OBJECT) {
             throw new JsonInputException("Expected token: } but was " +
                     parser.getCurrentToken() + " on " + lastName + " of message " +
                     schema.messageFullName());
@@ -486,8 +429,7 @@ public final class JsonInput implements Input
 
     @Override
     public void transferByteRangeTo(Output output, boolean utf8String, int fieldNumber,
-            boolean repeated) throws IOException
-    {
+                                    boolean repeated) throws IOException {
         if (utf8String)
             output.writeString(fieldNumber, readString(), repeated);
         else
@@ -498,26 +440,20 @@ public final class JsonInput implements Input
      * Reads a byte array/ByteBuffer value.
      */
     @Override
-    public ByteBuffer readByteBuffer() throws IOException
-    {
+    public ByteBuffer readByteBuffer() throws IOException {
         return ByteBuffer.wrap(readByteArray());
     }
 
     /**
      * Skip through the entire object/array field and all nested objects/arrays inside it
      */
-    private void skipField(JsonParser parser) throws IOException
-    {
+    private void skipField(JsonParser parser) throws IOException {
         int nestedObjects = 1; // we already parsed first '{' or '['
-        while (nestedObjects > 0 && parser.nextToken() != null)
-        {
+        while (nestedObjects > 0 && parser.nextToken() != null) {
             JsonToken token = parser.getCurrentToken();
-            if (token == START_OBJECT || token == START_ARRAY)
-            {
+            if (token == START_OBJECT || token == START_ARRAY) {
                 nestedObjects++;
-            }
-            else if (token == END_OBJECT || token == END_ARRAY)
-            {
+            } else if (token == END_OBJECT || token == END_ARRAY) {
                 nestedObjects--;
             }
         }

@@ -21,20 +21,18 @@ import io.protostuff.Tag;
 
 /**
  * The fields are filtered dependending on the Tag annotation {@link Tag#groupFilter()}.
- * 
+ *
  * @author David Yu
  * @created Feb 11, 2013
  */
-public class FilterFieldsByGroupTest extends AbstractTest
-{
+public class FilterFieldsByGroupTest extends AbstractTest {
 
     // power of two (max of 31 bits/groups allowed)
     static final int GROUP1 = 1;
     static final int GROUP2 = 2;
     static final int GROUP3 = 4;
 
-    static class Inner
-    {
+    static class Inner {
 
         // ============ ALL
 
@@ -101,8 +99,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         // exclude
         public boolean prop2and3b = false;
 
-        public Inner fillAll(boolean value)
-        {
+        public Inner fillAll(boolean value) {
             propAll = value;
 
             prop1a = value;
@@ -127,8 +124,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + (prop1a ? 1231 : 1237);
@@ -148,8 +144,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         }
 
         @Override
-        public boolean equals(Object obj)
-        {
+        public boolean equals(Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -187,8 +182,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return "Inner [propAll=" + propAll + ", prop1a=" + prop1a
                     + ", prop1b=" + prop1b + ", prop2a=" + prop2a + ", prop2b="
                     + prop2b + ", prop3a=" + prop3a + ", prop3b=" + prop3b
@@ -200,8 +194,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
 
     }
 
-    public void testIt() throws Exception
-    {
+    public void testIt() throws Exception {
         // contains all fields
         DefaultIdStrategy primary = new DefaultIdStrategy();
 
@@ -215,8 +208,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         verifyGroup3(g3);
     }
 
-    static void verifyPrimary(IdStrategy strategy) throws Exception
-    {
+    static void verifyPrimary(IdStrategy strategy) throws Exception {
         Schema<Inner> schema = RuntimeSchema.getSchema(Inner.class, strategy);
         Inner message = new Inner().fillAll(true);
 
@@ -227,8 +219,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         assertTrue(message.equals(parsed));
     }
 
-    static void verifyGroup1(IdStrategy strategy) throws Exception
-    {
+    static void verifyGroup1(IdStrategy strategy) throws Exception {
         Schema<Inner> schema = RuntimeSchema.getSchema(Inner.class, strategy);
         Inner message = new Inner().fillAll(true);
 
@@ -259,8 +250,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         assertTrue(message.prop2and3b != parsed.prop2and3b);
     }
 
-    static void verifyGroup2(IdStrategy strategy) throws Exception
-    {
+    static void verifyGroup2(IdStrategy strategy) throws Exception {
         Schema<Inner> schema = RuntimeSchema.getSchema(Inner.class, strategy);
         Inner message = new Inner().fillAll(true);
 
@@ -291,8 +281,7 @@ public class FilterFieldsByGroupTest extends AbstractTest
         assertTrue(message.prop2and3b == parsed.prop2and3b);
     }
 
-    static void verifyGroup3(IdStrategy strategy) throws Exception
-    {
+    static void verifyGroup3(IdStrategy strategy) throws Exception {
         Schema<Inner> schema = RuntimeSchema.getSchema(Inner.class, strategy);
         Inner message = new Inner().fillAll(true);
 

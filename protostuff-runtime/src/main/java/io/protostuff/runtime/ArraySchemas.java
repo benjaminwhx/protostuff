@@ -27,6 +27,7 @@ import static io.protostuff.runtime.RuntimeFieldFactory.ID_INT32;
 import static io.protostuff.runtime.RuntimeFieldFactory.ID_INT64;
 import static io.protostuff.runtime.RuntimeFieldFactory.ID_SHORT;
 import static io.protostuff.runtime.RuntimeFieldFactory.ID_STRING;
+
 import io.protostuff.ByteString;
 import io.protostuff.GraphInput;
 import io.protostuff.Input;
@@ -43,14 +44,12 @@ import java.util.Date;
 
 /**
  * Built-in array schemas.
- * 
+ *
  * @author David Yu
  * @created Dec 4, 2012
  */
-public final class ArraySchemas
-{
-    private ArraySchemas()
-    {
+public final class ArraySchemas {
+    private ArraySchemas() {
     }
 
     /*
@@ -67,13 +66,11 @@ public final class ArraySchemas
             STR_ARRAY_DATA = "b",
             STR_ARRAY_NULLCOUNT = "c";
 
-    static boolean isPrimitive(int arrayId)
-    {
+    static boolean isPrimitive(int arrayId) {
         return arrayId < 8;
     }
 
-    static int toArrayId(int id, boolean primitive)
-    {
+    static int toArrayId(int id, boolean primitive) {
         if (primitive)
             return id - 1;
 
@@ -81,8 +78,7 @@ public final class ArraySchemas
         return id < 9 ? ((id - 1) | 0x08) : (id + 7);
     }
 
-    static int toInlineId(int arrayId)
-    {
+    static int toInlineId(int arrayId) {
         if (arrayId < 8)
             return arrayId + 1;
 
@@ -92,30 +88,28 @@ public final class ArraySchemas
         return arrayId - 7;
     }
 
-    static Base getSchema(int id, boolean primitive, IdStrategy strategy)
-    {
-        switch (id)
-        {
+    static Base getSchema(int id, boolean primitive, IdStrategy strategy) {
+        switch (id) {
             case ID_BOOL:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_BOOL_PRIMITIVE_SCHEMA : strategy.ARRAY_BOOL_BOXED_SCHEMA;
             case ID_CHAR:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_CHAR_PRIMITIVE_SCHEMA : strategy.ARRAY_CHAR_BOXED_SCHEMA;
             case ID_SHORT:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_SHORT_PRIMITIVE_SCHEMA : strategy.ARRAY_SHORT_BOXED_SCHEMA;
             case ID_INT32:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_INT32_PRIMITIVE_SCHEMA : strategy.ARRAY_INT32_BOXED_SCHEMA;
             case ID_INT64:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_INT64_PRIMITIVE_SCHEMA : strategy.ARRAY_INT64_BOXED_SCHEMA;
             case ID_FLOAT:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_FLOAT_PRIMITIVE_SCHEMA : strategy.ARRAY_FLOAT_BOXED_SCHEMA;
             case ID_DOUBLE:
-                return primitive ? 
+                return primitive ?
                         strategy.ARRAY_DOUBLE_PRIMITIVE_SCHEMA : strategy.ARRAY_DOUBLE_BOXED_SCHEMA;
             case ID_STRING:
                 return strategy.ARRAY_STRING_SCHEMA;
@@ -134,10 +128,8 @@ public final class ArraySchemas
         }
     }
 
-    static Base getGenericElementSchema(int id, IdStrategy strategy)
-    {
-        switch (id)
-        {
+    static Base getGenericElementSchema(int id, IdStrategy strategy) {
+        switch (id) {
             case ID_BOOL:
                 return strategy.ARRAY_BOOL_DERIVED_SCHEMA;
             case ID_CHAR:
@@ -170,10 +162,8 @@ public final class ArraySchemas
     }
 
     static Base newSchema(int id, Class<?> compontentType, Class<?> typeClass,
-            IdStrategy strategy, final Handler handler)
-    {
-        switch (id)
-        {
+                          IdStrategy strategy, final Handler handler) {
+        switch (id) {
             case ID_BOOL:
                 return new BoolArray(strategy, handler, compontentType.isPrimitive());
             case ID_CHAR:
@@ -205,10 +195,8 @@ public final class ArraySchemas
         }
     }
 
-    static String name(int number)
-    {
-        switch (number)
-        {
+    static String name(int number) {
+        switch (number) {
             case ID_ARRAY_LEN:
                 return STR_ARRAY_LEN;
             case ID_ARRAY_DATA:
@@ -220,13 +208,11 @@ public final class ArraySchemas
         }
     }
 
-    static int number(String name)
-    {
+    static int number(String name) {
         if (name.length() != 1)
             return 0;
 
-        switch (name.charAt(0))
-        {
+        switch (name.charAt(0)) {
             case 'a':
                 return ID_ARRAY_LEN;
             case 'b':
@@ -239,25 +225,22 @@ public final class ArraySchemas
     }
 
     static void transferObject(Pipe.Schema<Object> pipeSchema, Pipe pipe,
-            Input input, Output output, IdStrategy strategy,
-            Delegate<?> delegate) throws IOException
-    {
+                               Input input, Output output, IdStrategy strategy,
+                               Delegate<?> delegate) throws IOException {
         if (ID_ARRAY_LEN != input.readFieldNumber(pipeSchema.wrappedSchema))
             throw new ProtostuffException("Corrupt input.");
 
         int len = input.readInt32();
         // write it back
         output.writeInt32(ID_ARRAY_LEN, len, false);
-        
+
         // if from derived schema and the array is boxed, the length written
         // during serialization is: -(len + 1)
         if (len < 0)
             len = -len - 1;
 
-        for (int i = 0, nullCount = 0; i < len;)
-        {
-            switch (input.readFieldNumber(pipeSchema.wrappedSchema))
-            {
+        for (int i = 0, nullCount = 0; i < len; ) {
+            switch (input.readFieldNumber(pipeSchema.wrappedSchema)) {
                 case ID_ARRAY_DATA:
                     i++;
                     delegate.transfer(pipe, input, output, ID_ARRAY_DATA, true);
@@ -276,53 +259,45 @@ public final class ArraySchemas
             throw new ProtostuffException("Corrupt input.");
     }
 
-    public static abstract class Base extends PolymorphicSchema
-    {
+    public static abstract class Base extends PolymorphicSchema {
         protected final Handler handler;
         protected final boolean allowNullArrayElement;
 
-        public Base(IdStrategy strategy, final Handler handler)
-        {
+        public Base(IdStrategy strategy, final Handler handler) {
             super(strategy);
 
             this.handler = handler;
-            
+
             allowNullArrayElement = 0 != (IdStrategy.ALLOW_NULL_ARRAY_ELEMENT & strategy.flags);
         }
 
         @Override
-        public String getFieldName(int number)
-        {
+        public String getFieldName(int number) {
             return name(number);
         }
 
         @Override
-        public int getFieldNumber(String name)
-        {
+        public int getFieldNumber(String name) {
             return number(name);
         }
 
         @Override
-        public String messageFullName()
-        {
+        public String messageFullName() {
             return Array.class.getName();
         }
 
         @Override
-        public String messageName()
-        {
+        public String messageName() {
             return Array.class.getSimpleName();
         }
 
         @Override
-        protected void setValue(Object value, Object owner)
-        {
+        protected void setValue(Object value, Object owner) {
             handler.setValue(value, owner);
         }
 
         @Override
-        public void mergeFrom(Input input, Object owner) throws IOException
-        {
+        public void mergeFrom(Input input, Object owner) throws IOException {
             setValue(readFrom(input, owner), owner);
         }
 
@@ -330,15 +305,12 @@ public final class ArraySchemas
                 throws IOException;
     }
 
-    public static class BoolArray extends Base
-    {
+    public static class BoolArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.BOOL);
             }
@@ -346,30 +318,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        BoolArray(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        BoolArray(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             boolean[] array = new boolean[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -381,21 +348,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Boolean[] array = new Boolean[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readBool();
                         break;
@@ -412,29 +375,25 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 boolean[] array = (boolean[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -448,21 +407,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Boolean v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeBool(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -471,23 +425,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class CharArray extends Base
-    {
+    public static class CharArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.CHAR);
             }
@@ -495,30 +445,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        CharArray(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        CharArray(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             char[] array = new char[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -530,21 +475,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Character[] array = new Character[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = (char) input.readUInt32();
                         break;
@@ -563,27 +504,23 @@ public final class ArraySchemas
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 char[] array = (char[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -597,21 +534,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Character v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeUInt32(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -620,23 +552,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class ShortArray extends Base
-    {
+    public static class ShortArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.SHORT);
             }
@@ -644,30 +572,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        ShortArray(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        ShortArray(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             short[] array = new short[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -679,21 +602,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Short[] array = new Short[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = (short) input.readUInt32();
                         break;
@@ -712,27 +631,23 @@ public final class ArraySchemas
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 short[] array = (short[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -746,21 +661,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Short v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeUInt32(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -769,23 +679,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class Int32Array extends Base
-    {
+    public static class Int32Array extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.INT32);
             }
@@ -793,30 +699,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        Int32Array(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        Int32Array(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             int[] array = new int[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -828,21 +729,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Integer[] array = new Integer[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readInt32();
                         break;
@@ -861,26 +758,22 @@ public final class ArraySchemas
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
-        protected void writeTo(Output output, Object value, boolean primitive) throws IOException
-        {
-            if (primitive)
-            {
+
+        protected void writeTo(Output output, Object value, boolean primitive) throws IOException {
+            if (primitive) {
                 int[] array = (int[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -894,21 +787,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Integer v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeInt32(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -917,23 +805,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class Int64Array extends Base
-    {
+    public static class Int64Array extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.INT64);
             }
@@ -941,30 +825,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        Int64Array(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        Int64Array(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             long[] array = new long[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -976,21 +855,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Long[] array = new Long[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readInt64();
                         break;
@@ -1009,27 +884,23 @@ public final class ArraySchemas
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 long[] array = (long[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -1043,21 +914,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Long v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeInt64(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1066,23 +932,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class FloatArray extends Base
-    {
+    public static class FloatArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.FLOAT);
             }
@@ -1090,30 +952,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        FloatArray(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        FloatArray(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
-        
+
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             float[] array = new float[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -1125,21 +982,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Float[] array = new Float[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readFloat();
                         break;
@@ -1158,27 +1011,23 @@ public final class ArraySchemas
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
 
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 float[] array = (float[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -1192,21 +1041,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Float v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeFloat(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1215,23 +1059,19 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class DoubleArray extends Base
-    {
+    public static class DoubleArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.DOUBLE);
             }
@@ -1239,30 +1079,25 @@ public final class ArraySchemas
 
         final boolean primitive;
 
-        DoubleArray(IdStrategy strategy, Handler handler, boolean primitive)
-        {
+        DoubleArray(IdStrategy strategy, Handler handler, boolean primitive) {
             super(strategy, handler);
             this.primitive = primitive;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         protected Object readPrimitiveFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             double[] array = new double[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 if (ID_ARRAY_DATA != input.readFieldNumber(this))
                     throw new ProtostuffException("Corrupt input.");
 
@@ -1274,21 +1109,17 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         protected Object readBoxedFrom(Input input, Object owner, int len)
-                throws IOException
-        {
+                throws IOException {
             final Double[] array = new Double[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readDouble();
                         break;
@@ -1305,29 +1136,25 @@ public final class ArraySchemas
 
             return array;
         }
-        
+
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
-            return primitive ? readPrimitiveFrom(input, owner, len) : 
+            return primitive ? readPrimitiveFrom(input, owner, len) :
                     readBoxedFrom(input, owner, len);
         }
-        
+
         protected void writeLengthTo(Output output, int len, boolean primitive)
-                throws IOException
-        {
+                throws IOException {
             output.writeInt32(ID_ARRAY_LEN, len, false);
         }
-        
+
         protected void writeTo(Output output, Object value, boolean primitive)
-                throws IOException
-        {
-            if (primitive)
-            {
+                throws IOException {
+            if (primitive) {
                 double[] array = (double[]) value;
                 writeLengthTo(output, array.length, true);
 
@@ -1341,21 +1168,16 @@ public final class ArraySchemas
             writeLengthTo(output, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Double v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeDouble(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1364,58 +1186,48 @@ public final class ArraySchemas
             if (nullCount != 0)
                 output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
         }
-        
+
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             writeTo(output, value, primitive);
         }
     }
 
-    public static class StringArray extends Base
-    {
+    public static class StringArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.STRING);
             }
         };
 
-        StringArray(IdStrategy strategy, Handler handler)
-        {
+        StringArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             String[] array = new String[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readString();
                         break;
@@ -1434,27 +1246,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
-            CharSequence[] array = (CharSequence []) value;
+        public void writeTo(Output output, Object value) throws IOException {
+            CharSequence[] array = (CharSequence[]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 CharSequence v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeString(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1465,50 +1271,41 @@ public final class ArraySchemas
         }
     }
 
-    public static class ByteStringArray extends Base
-    {
+    public static class ByteStringArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.BYTES);
             }
         };
 
-        ByteStringArray(IdStrategy strategy, Handler handler)
-        {
+        ByteStringArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             ByteString[] array = new ByteString[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readBytes();
                         break;
@@ -1527,27 +1324,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             ByteString[] array = (ByteString[]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 ByteString v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeBytes(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1558,50 +1349,41 @@ public final class ArraySchemas
         }
     }
 
-    public static class ByteArrayArray extends Base
-    {
+    public static class ByteArrayArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.BYTE_ARRAY);
             }
         };
 
-        ByteArrayArray(IdStrategy strategy, Handler handler)
-        {
+        ByteArrayArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             byte[][] array = new byte[len][];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = input.readByteArray();
                         break;
@@ -1620,27 +1402,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             byte[][] array = (byte[][]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 byte[] v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeByteArray(ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1651,50 +1427,41 @@ public final class ArraySchemas
         }
     }
 
-    public static class BigDecimalArray extends Base
-    {
+    public static class BigDecimalArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.BIGDECIMAL);
             }
         };
 
-        BigDecimalArray(IdStrategy strategy, Handler handler)
-        {
+        BigDecimalArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             BigDecimal[] array = new BigDecimal[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = new BigDecimal(input.readString());
                         break;
@@ -1713,27 +1480,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             BigDecimal[] array = (BigDecimal[]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 BigDecimal v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeString(ID_ARRAY_DATA, v.toString(), true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1744,50 +1505,41 @@ public final class ArraySchemas
         }
     }
 
-    public static class BigIntegerArray extends Base
-    {
+    public static class BigIntegerArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.BIGINTEGER);
             }
         };
 
-        BigIntegerArray(IdStrategy strategy, Handler handler)
-        {
+        BigIntegerArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             BigInteger[] array = new BigInteger[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = new BigInteger(input.readByteArray());
                         break;
@@ -1806,27 +1558,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             BigInteger[] array = (BigInteger[]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 BigInteger v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeByteArray(ID_ARRAY_DATA, v.toByteArray(), true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1837,50 +1583,41 @@ public final class ArraySchemas
         }
     }
 
-    public static class DateArray extends Base
-    {
+    public static class DateArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy,
                         RuntimeFieldFactory.DATE);
             }
         };
 
-        DateArray(IdStrategy strategy, Handler handler)
-        {
+        DateArray(IdStrategy strategy, Handler handler) {
             super(strategy, handler);
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             Date[] array = new Date[len];
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         array[i++] = new Date(input.readFixed64());
                         break;
@@ -1899,27 +1636,21 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object value) throws IOException
-        {
+        public void writeTo(Output output, Object value) throws IOException {
             Date[] array = (Date[]) value;
             output.writeInt32(ID_ARRAY_LEN, array.length, false);
 
             int nullCount = 0;
-            for (int i = 0, len = array.length; i < len; i++)
-            {
+            for (int i = 0, len = array.length; i < len; i++) {
                 Date v = array[i];
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeFixed64(ID_ARRAY_DATA, v.getTime(), true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -1930,52 +1661,43 @@ public final class ArraySchemas
         }
     }
 
-    public static class DelegateArray extends Base
-    {
+    public static class DelegateArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 transferObject(this, pipe, input, output, strategy, delegate);
             }
         };
 
         final Delegate<Object> delegate;
 
-        public DelegateArray(IdStrategy strategy, Handler handler, Delegate<Object> delegate)
-        {
+        public DelegateArray(IdStrategy strategy, Handler handler, Delegate<Object> delegate) {
             super(strategy, handler);
             this.delegate = delegate;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             Object array = Array.newInstance(delegate.typeClass(), len);
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         Array.set(array, i++, delegate.readFrom(input));
                         break;
@@ -1994,28 +1716,22 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object array) throws IOException
-        {
+        public void writeTo(Output output, Object array) throws IOException {
             final int len = Array.getLength(array);
 
             output.writeInt32(ID_ARRAY_LEN, len, false);
 
             int nullCount = 0;
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 Object v = Array.get(array, i);
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     delegate.writeTo(output, ID_ARRAY_DATA, v, true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -2026,15 +1742,12 @@ public final class ArraySchemas
         }
     }
 
-    public static class EnumArray extends Base
-    {
+    public static class EnumArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 if (ID_ARRAY_LEN != input
                         .readFieldNumber(pipeSchema.wrappedSchema))
                     throw new ProtostuffException("Corrupt input.");
@@ -2043,10 +1756,8 @@ public final class ArraySchemas
                 // write it back
                 output.writeInt32(ID_ARRAY_LEN, len, false);
 
-                for (int i = 0, nullCount = 0; i < len;)
-                {
-                    switch (input.readFieldNumber(pipeSchema.wrappedSchema))
-                    {
+                for (int i = 0, nullCount = 0; i < len; ) {
+                    switch (input.readFieldNumber(pipeSchema.wrappedSchema)) {
                         case ID_ARRAY_DATA:
                             i++;
                             EnumIO.transfer(pipe, input, output, ID_ARRAY_DATA, true, eio.strategy);
@@ -2068,37 +1779,31 @@ public final class ArraySchemas
 
         final EnumIO<?> eio;
 
-        public EnumArray(IdStrategy strategy, Handler handler, EnumIO<?> eio)
-        {
+        public EnumArray(IdStrategy strategy, Handler handler, EnumIO<?> eio) {
             super(strategy, handler);
             this.eio = eio;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             Object array = Array.newInstance(eio.enumClass, len);
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         Array.set(array, i++, eio.readFrom(input));
                         break;
@@ -2117,28 +1822,22 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object array) throws IOException
-        {
+        public void writeTo(Output output, Object array) throws IOException {
             final int len = Array.getLength(array);
 
             output.writeInt32(ID_ARRAY_LEN, len, false);
 
             int nullCount = 0;
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 Enum<?> v = (Enum<?>) Array.get(array, i);
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     eio.writeTo(output, ID_ARRAY_DATA, true, v);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }
@@ -2149,15 +1848,12 @@ public final class ArraySchemas
         }
     }
 
-    public static class PojoArray extends Base
-    {
+    public static class PojoArray extends Base {
         protected final Pipe.Schema<Object> pipeSchema = new Pipe.Schema<Object>(
-                this)
-        {
+                this) {
             @Override
             protected void transfer(Pipe pipe, Input input, Output output)
-                    throws IOException
-            {
+                    throws IOException {
                 if (ID_ARRAY_LEN != input
                         .readFieldNumber(pipeSchema.wrappedSchema))
                     throw new ProtostuffException("Corrupt input.");
@@ -2166,10 +1862,8 @@ public final class ArraySchemas
                 // write it back
                 output.writeInt32(ID_ARRAY_LEN, len, false);
 
-                for (int i = 0, nullCount = 0; i < len;)
-                {
-                    switch (input.readFieldNumber(pipeSchema.wrappedSchema))
-                    {
+                for (int i = 0, nullCount = 0; i < len; ) {
+                    switch (input.readFieldNumber(pipeSchema.wrappedSchema)) {
                         case ID_ARRAY_DATA:
                             i++;
                             output.writeObject(ID_ARRAY_DATA, pipe, hs.getPipeSchema(),
@@ -2192,37 +1886,31 @@ public final class ArraySchemas
 
         final HasSchema<Object> hs;
 
-        public PojoArray(IdStrategy strategy, Handler handler, HasSchema<Object> hs)
-        {
+        public PojoArray(IdStrategy strategy, Handler handler, HasSchema<Object> hs) {
             super(strategy, handler);
             this.hs = hs;
         }
 
         @Override
-        public Pipe.Schema<Object> getPipeSchema()
-        {
+        public Pipe.Schema<Object> getPipeSchema() {
             return pipeSchema;
         }
 
         @Override
-        public Object readFrom(Input input, Object owner) throws IOException
-        {
+        public Object readFrom(Input input, Object owner) throws IOException {
             if (ID_ARRAY_LEN != input.readFieldNumber(this))
                 throw new ProtostuffException("Corrupt input.");
 
             final int len = input.readInt32();
 
             Object array = Array.newInstance(hs.getSchema().typeClass(), len);
-            if (input instanceof GraphInput)
-            {
+            if (input instanceof GraphInput) {
                 // update the actual reference.
                 ((GraphInput) input).updateLast(array, owner);
             }
 
-            for (int i = 0; i < len;)
-            {
-                switch (input.readFieldNumber(this))
-                {
+            for (int i = 0; i < len; ) {
+                switch (input.readFieldNumber(this)) {
                     case ID_ARRAY_DATA:
                         Array.set(array, i++, input.mergeObject(null, hs.getSchema()));
                         break;
@@ -2241,28 +1929,22 @@ public final class ArraySchemas
         }
 
         @Override
-        public void writeTo(Output output, Object array) throws IOException
-        {
+        public void writeTo(Output output, Object array) throws IOException {
             final int len = Array.getLength(array);
 
             output.writeInt32(ID_ARRAY_LEN, len, false);
 
             int nullCount = 0;
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 Object v = Array.get(array, i);
-                if (v != null)
-                {
-                    if (nullCount != 0)
-                    {
+                if (v != null) {
+                    if (nullCount != 0) {
                         output.writeUInt32(ID_ARRAY_NULLCOUNT, nullCount, false);
                         nullCount = 0;
                     }
 
                     output.writeObject(ID_ARRAY_DATA, v, hs.getSchema(), true);
-                }
-                else if (allowNullArrayElement)
-                {
+                } else if (allowNullArrayElement) {
                     nullCount++;
                 }
             }

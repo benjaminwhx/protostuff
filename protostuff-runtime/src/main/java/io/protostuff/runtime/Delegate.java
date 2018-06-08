@@ -36,14 +36,12 @@ import io.protostuff.Pipe;
 import io.protostuff.WireFormat.FieldType;
 
 /**
- * Controls how certain types are serialized and can even override the existing serializers because this has higher
- * priority when the fields are being built.
- * 
+ * 控制特定类型的序列化方式，甚至可以覆盖现有的序列化器，因为这些字段在构建时具有更高的优先级。
+ *
  * @author David Yu
  * @created Apr 20, 2012
  */
-public interface Delegate<V>
-{
+public interface Delegate<V> {
 
     /**
      * The field type (for possible reflective operations in future releases).
@@ -65,7 +63,7 @@ public interface Delegate<V>
      * Transfers the type from the input to the output.
      */
     public void transfer(Pipe pipe, Input input, Output output, int number,
-            boolean repeated) throws IOException;
+                         boolean repeated) throws IOException;
 
     /**
      * The class of the target value.

@@ -10,35 +10,31 @@ import java.util.Map;
 
 /**
  * Field mapping implemented on top of hash for field lookup by number.
- *
+ * <p>
  * This is the less efficient than {@code ArrayFieldMap} for almost all cases.
  * But in case when field numbers are sparse and especially when max field
  * number is big - this mapping should be used.
  *
- * @see io.protostuff.runtime.ArrayFieldMap
- *
  * @author Kostiantyn Shchepanovskyi
+ * @see io.protostuff.runtime.ArrayFieldMap
  */
-final class HashFieldMap<T> implements FieldMap<T>
-{
+final class HashFieldMap<T> implements FieldMap<T> {
     private static final FieldComparator FIELD_COMPARATOR = new FieldComparator();
     private final List<Field<T>> fields;
+    // key: number
     private final Map<Integer, Field<T>> fieldsByNumber;
+    // key: 字段名
     private final Map<String, Field<T>> fieldsByName;
 
-    public HashFieldMap(Collection<Field<T>> fields)
-    {
+    public HashFieldMap(Collection<Field<T>> fields) {
         fieldsByName = new HashMap<String, Field<T>>();
         fieldsByNumber = new HashMap<Integer, Field<T>>();
-        for (Field<T> f : fields)
-        {
-            if (fieldsByName.containsKey(f.name))
-            {
+        for (Field<T> f : fields) {
+            if (fieldsByName.containsKey(f.name)) {
                 Field<T> prev = fieldsByName.get(f.name);
                 throw new IllegalStateException(prev + " and " + f + " cannot have the same name.");
             }
-            if (fieldsByNumber.containsKey(f.number))
-            {
+            if (fieldsByNumber.containsKey(f.number)) {
                 Field<T> prev = fieldsByNumber.get(f.number);
                 throw new IllegalStateException(prev + " and " + f + " cannot have the same number.");
             }
@@ -53,34 +49,28 @@ final class HashFieldMap<T> implements FieldMap<T>
     }
 
     @Override
-    public Field<T> getFieldByNumber(int n)
-    {
+    public Field<T> getFieldByNumber(int n) {
         return fieldsByNumber.get(n);
     }
 
     @Override
-    public Field<T> getFieldByName(String fieldName)
-    {
+    public Field<T> getFieldByName(String fieldName) {
         return fieldsByName.get(fieldName);
     }
 
     @Override
-    public int getFieldCount()
-    {
+    public int getFieldCount() {
         return fields.size();
     }
 
     @Override
-    public List<Field<T>> getFields()
-    {
+    public List<Field<T>> getFields() {
         return fields;
     }
 
-    private static class FieldComparator implements Comparator<Field<?>>
-    {
+    private static class FieldComparator implements Comparator<Field<?>> {
         @Override
-        public int compare(Field<?> o1, Field<?> o2)
-        {
+        public int compare(Field<?> o1, Field<?> o2) {
             return compare(o1.number, o2.number);
         }
 

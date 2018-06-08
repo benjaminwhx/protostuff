@@ -35,15 +35,14 @@ import io.protostuff.runtime.PolymorphicSchema.Handler;
 /**
  * Wraps a schema.
  */
-public abstract class HasSchema<T> implements PolymorphicSchema.Factory
-{
+public abstract class HasSchema<T> implements PolymorphicSchema.Factory {
 
     public final IdStrategy strategy;
-    
+
     public final ArraySchemas.Base genericElementSchema;
-    
+
     /**
-     * Gets the schema.
+     * 获取Schema
      */
     public abstract Schema<T> getSchema();
 
@@ -55,19 +54,17 @@ public abstract class HasSchema<T> implements PolymorphicSchema.Factory
     // for the array of this type
 
     @SuppressWarnings("unchecked")
-    protected HasSchema(IdStrategy strategy)
-    {
+    protected HasSchema(IdStrategy strategy) {
         this.strategy = strategy;
-        
-        genericElementSchema = new ArraySchemas.PojoArray(strategy, 
+
+        genericElementSchema = new ArraySchemas.PojoArray(strategy,
                 null, (HasSchema<Object>) this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public PolymorphicSchema newSchema(Class<?> typeClass, IdStrategy strategy,
-            Handler handler)
-    {
+                                       Handler handler) {
         return new ArraySchemas.PojoArray(strategy, handler, (HasSchema<Object>) this);
     }
 

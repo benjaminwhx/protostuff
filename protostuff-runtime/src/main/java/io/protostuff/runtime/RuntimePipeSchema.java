@@ -22,18 +22,16 @@ import io.protostuff.Pipe;
 import io.protostuff.Schema;
 
 /**
- * Runtime pipe schema.
- * 
+ * 运行时管道模式
+ *
  * @author David Yu
  * @created Nov 9, 2012
  */
-public final class RuntimePipeSchema<T> extends Pipe.Schema<T>
-{
+public final class RuntimePipeSchema<T> extends Pipe.Schema<T> {
 
     final FieldMap<T> fieldsMap;
 
-    public RuntimePipeSchema(Schema<T> schema, FieldMap<T> fieldMap)
-    {
+    public RuntimePipeSchema(Schema<T> schema, FieldMap<T> fieldMap) {
         super(schema);
 
         this.fieldsMap = fieldMap;
@@ -41,11 +39,9 @@ public final class RuntimePipeSchema<T> extends Pipe.Schema<T>
 
     @Override
     protected void transfer(Pipe pipe, Input input, Output output)
-            throws IOException
-    {
+            throws IOException {
         for (int number = input.readFieldNumber(wrappedSchema); number != 0; number = input
-                .readFieldNumber(wrappedSchema))
-        {
+                .readFieldNumber(wrappedSchema)) {
             final Field<T> field = fieldsMap.getFieldByNumber(number);
             if (field == null)
                 input.handleUnknownField(number, wrappedSchema);

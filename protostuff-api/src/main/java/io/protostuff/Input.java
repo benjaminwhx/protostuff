@@ -18,21 +18,20 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * An Input lets an application read primitive data types and objects from a source of data.
- * 
+ * Input允许应用程序从数据源读取原始数据类型和对象。
+ *
  * @author David Yu
  * @created Nov 9, 2009
  */
-public interface Input
-{
+public interface Input {
 
     /**
-     * The underlying implementation should handle the unknown field.
+     * 底层实现应该处理未知的字段
      */
     public <T> void handleUnknownField(int fieldNumber, Schema<T> schema) throws IOException;
 
     /**
-     * Reads the field number of a message/object tied to the given {@link Schema schema}.
+     * 读取与schema绑定对象的字段number
      */
     public <T> int readFieldNumber(Schema<T> schema) throws IOException;
 
@@ -138,6 +137,6 @@ public interface Input
      * Transfer the byte range to the output. Capable of zero-copy transfer depending on the type of input.
      */
     public void transferByteRangeTo(Output output, boolean utf8String, int fieldNumber,
-            boolean repeated) throws IOException;
+                                    boolean repeated) throws IOException;
 
 }

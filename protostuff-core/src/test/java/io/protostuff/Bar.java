@@ -22,24 +22,21 @@ import java.util.HashMap;
 
 /**
  * Bar - for testing
- * 
+ *
  * @author David Yu
  * @created Nov 10, 2009
  */
-public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
-{
+public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable {
 
     static final Bar DEFAULT_INSTANCE = new Bar();
 
-    public static Bar getSchema()
-    {
+    public static Bar getSchema() {
         return DEFAULT_INSTANCE;
     }
 
     private static final HashMap<String, Integer> __fieldMap = new HashMap<String, Integer>();
 
-    static
-    {
+    static {
         __fieldMap.put("someInt", 1);
         __fieldMap.put("someString", 2);
         __fieldMap.put("someBaz", 3);
@@ -51,26 +48,21 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
         __fieldMap.put("someLong", 9);
     }
 
-    public enum Status
-    {
+    public enum Status {
         PENDING(0), STARTED(1), COMPLETED(2);
 
         public final int number;
 
-        Status(int number)
-        {
+        Status(int number) {
             this.number = number;
         }
 
-        public int getNumber()
-        {
+        public int getNumber() {
             return number;
         }
 
-        public static Status valueOf(int number)
-        {
-            switch (number)
-            {
+        public static Status valueOf(int number) {
+            switch (number) {
                 case 0:
                     return PENDING;
                 case 1:
@@ -92,8 +84,7 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
     private double someDouble;
     private long someLong;
 
-    public Bar()
-    {
+    public Bar() {
 
     }
 
@@ -106,8 +97,7 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
             boolean someBoolean,
             float someFloat,
             double someDouble,
-            long someLong)
-    {
+            long someLong) {
         this.someInt = someInt;
         this.someString = someString;
         this.someBaz = baz;
@@ -122,197 +112,162 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
     /**
      * @return the someInt
      */
-    public int getSomeInt()
-    {
+    public int getSomeInt() {
         return someInt;
     }
 
     /**
-     * @param someInt
-     *            the someInt to set
+     * @param someInt the someInt to set
      */
-    public void setSomeInt(int someInt)
-    {
+    public void setSomeInt(int someInt) {
         this.someInt = someInt;
     }
 
     /**
      * @return the someString
      */
-    public String getSomeString()
-    {
+    public String getSomeString() {
         return someString;
     }
 
     /**
-     * @param someString
-     *            the someString to set
+     * @param someString the someString to set
      */
-    public void setSomeString(String someString)
-    {
+    public void setSomeString(String someString) {
         this.someString = someString;
     }
 
     /**
      * @return the someBaz
      */
-    public Baz getSomeBaz()
-    {
+    public Baz getSomeBaz() {
         return someBaz;
     }
 
     /**
-     * @param baz
-     *            the someBaz to set
+     * @param baz the someBaz to set
      */
-    public void setSomeBaz(Baz baz)
-    {
+    public void setSomeBaz(Baz baz) {
         this.someBaz = baz;
     }
 
     /**
      * @return the someEnum
      */
-    public Status getSomeEnum()
-    {
+    public Status getSomeEnum() {
         return someEnum;
     }
 
     /**
-     * @param someEnum
-     *            the someEnum to set
+     * @param someEnum the someEnum to set
      */
-    public void setSomeEnum(Status someEnum)
-    {
+    public void setSomeEnum(Status someEnum) {
         this.someEnum = someEnum;
     }
 
     /**
      * @return the someBytes
      */
-    public ByteString getSomeBytes()
-    {
+    public ByteString getSomeBytes() {
         return someBytes;
     }
 
     /**
-     * @param someBytes
-     *            the someBytes to set
+     * @param someBytes the someBytes to set
      */
-    public void setSomeBytes(ByteString someBytes)
-    {
+    public void setSomeBytes(ByteString someBytes) {
         this.someBytes = someBytes;
     }
 
     /**
      * @return the someBoolean
      */
-    public boolean getSomeBoolean()
-    {
+    public boolean getSomeBoolean() {
         return someBoolean;
     }
 
     /**
-     * @param someBoolean
-     *            the someBoolean to set
+     * @param someBoolean the someBoolean to set
      */
-    public void setSomeBoolean(boolean someBoolean)
-    {
+    public void setSomeBoolean(boolean someBoolean) {
         this.someBoolean = someBoolean;
     }
 
     /**
      * @return the someFloat
      */
-    public float getSomeFloat()
-    {
+    public float getSomeFloat() {
         return someFloat;
     }
 
     /**
-     * @param someFloat
-     *            the someFloat to set
+     * @param someFloat the someFloat to set
      */
-    public void setSomeFloat(float someFloat)
-    {
+    public void setSomeFloat(float someFloat) {
         this.someFloat = someFloat;
     }
 
     /**
      * @return the someDouble
      */
-    public double getSomeDouble()
-    {
+    public double getSomeDouble() {
         return someDouble;
     }
 
     /**
-     * @param someDouble
-     *            the someDouble to set
+     * @param someDouble the someDouble to set
      */
-    public void setSomeDouble(double someDouble)
-    {
+    public void setSomeDouble(double someDouble) {
         this.someDouble = someDouble;
     }
 
     /**
      * @return the someLong
      */
-    public long getSomeLong()
-    {
+    public long getSomeLong() {
         return someLong;
     }
 
     /**
-     * @param someLong
-     *            the someLong to set
+     * @param someLong the someLong to set
      */
-    public void setSomeLong(long someLong)
-    {
+    public void setSomeLong(long someLong) {
         this.someLong = someLong;
     }
 
     @Override
-    public Schema<Bar> cachedSchema()
-    {
+    public Schema<Bar> cachedSchema() {
         return this;
     }
 
     @Override
-    public boolean isInitialized(Bar message)
-    {
+    public boolean isInitialized(Bar message) {
         return true;
     }
 
     @Override
-    public Bar newMessage()
-    {
+    public Bar newMessage() {
         return new Bar();
     }
 
     @Override
-    public Class<Bar> typeClass()
-    {
+    public Class<Bar> typeClass() {
         return Bar.class;
     }
 
     @Override
-    public String messageName()
-    {
+    public String messageName() {
         return getClass().getSimpleName();
     }
 
     @Override
-    public String messageFullName()
-    {
+    public String messageFullName() {
         return getClass().getName();
     }
 
     @Override
-    public String getFieldName(int number)
-    {
-        switch (number)
-        {
+    public String getFieldName(int number) {
+        switch (number) {
             case 1:
                 return "someInt";
             case 2:
@@ -337,27 +292,23 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
     }
 
     @Override
-    public int getFieldNumber(String name)
-    {
+    public int getFieldNumber(String name) {
         Integer number = __fieldMap.get(name);
         return number == null ? 0 : number.intValue();
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException
-    {
+    public void readExternal(ObjectInput in) throws IOException {
         GraphIOUtil.mergeDelimitedFrom(in, this, this);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException
-    {
+    public void writeExternal(ObjectOutput out) throws IOException {
         GraphIOUtil.writeDelimitedTo(out, this, this);
     }
 
     @Override
-    public void writeTo(Output output, Bar message) throws IOException
-    {
+    public void writeTo(Output output, Bar message) throws IOException {
         if (message.someInt != 0)
             output.writeInt32(1, message.someInt, false);
 
@@ -387,12 +338,9 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
     }
 
     @Override
-    public void mergeFrom(Input input, Bar message) throws IOException
-    {
-        for (int number = input.readFieldNumber(this);; number = input.readFieldNumber(this))
-        {
-            switch (number)
-            {
+    public void mergeFrom(Input input, Bar message) throws IOException {
+        for (int number = input.readFieldNumber(this); ; number = input.readFieldNumber(this)) {
+            switch (number) {
                 case 0:
                     return;
                 case 1:
@@ -428,16 +376,12 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
         }
     }
 
-    static final Pipe.Schema<Bar> PIPE_SCHEMA = new Pipe.Schema<Bar>(DEFAULT_INSTANCE)
-    {
+    static final Pipe.Schema<Bar> PIPE_SCHEMA = new Pipe.Schema<Bar>(DEFAULT_INSTANCE) {
 
         @Override
-        protected void transfer(Pipe pipe, Input input, Output output) throws IOException
-        {
-            for (int number = input.readFieldNumber(wrappedSchema);; number = input.readFieldNumber(wrappedSchema))
-            {
-                switch (number)
-                {
+        protected void transfer(Pipe pipe, Input input, Output output) throws IOException {
+            for (int number = input.readFieldNumber(wrappedSchema); ; number = input.readFieldNumber(wrappedSchema)) {
+                switch (number) {
                     case 0:
                         return;
                     case 1:
@@ -474,13 +418,11 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
         }
     };
 
-    public static Pipe.Schema<Bar> getPipeSchema()
-    {
+    public static Pipe.Schema<Bar> getPipeSchema() {
         return PIPE_SCHEMA;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((someBaz == null) ? 0 : someBaz.hashCode());
@@ -497,8 +439,7 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
         return result;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
@@ -506,30 +447,24 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
         if (getClass() != obj.getClass())
             return false;
         Bar other = (Bar) obj;
-        if (someBaz == null)
-        {
+        if (someBaz == null) {
             if (other.someBaz != null)
                 return false;
-        }
-        else if (!someBaz.equals(other.someBaz))
+        } else if (!someBaz.equals(other.someBaz))
             return false;
         if (someBoolean != other.someBoolean)
             return false;
-        if (someBytes == null)
-        {
+        if (someBytes == null) {
             if (other.someBytes != null)
                 return false;
-        }
-        else if (!someBytes.equals(other.someBytes))
+        } else if (!someBytes.equals(other.someBytes))
             return false;
         if (Double.doubleToLongBits(someDouble) != Double.doubleToLongBits(other.someDouble))
             return false;
-        if (someEnum == null)
-        {
+        if (someEnum == null) {
             if (other.someEnum != null)
                 return false;
-        }
-        else if (!someEnum.equals(other.someEnum))
+        } else if (!someEnum.equals(other.someEnum))
             return false;
         if (Float.floatToIntBits(someFloat) != Float.floatToIntBits(other.someFloat))
             return false;
@@ -537,19 +472,16 @@ public final class Bar implements Message<Bar>, Schema<Bar>, Externalizable
             return false;
         if (someLong != other.someLong)
             return false;
-        if (someString == null)
-        {
+        if (someString == null) {
             if (other.someString != null)
                 return false;
-        }
-        else if (!someString.equals(other.someString))
+        } else if (!someString.equals(other.someString))
             return false;
         return true;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Bar [someBaz=" + someBaz + ", someBoolean=" + someBoolean + ", someBytes=" + someBytes
                 + ", someDouble=" + someDouble + ", someEnum="
                 + someEnum + ", someFloat=" + someFloat + ", someInt=" + someInt + ", someLong=" + someLong

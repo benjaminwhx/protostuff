@@ -28,14 +28,12 @@ import java.util.Properties;
  * @author David Yu
  * @created Jun 26, 2010
  */
-public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
-{
+public abstract class MapSchema<K, V> implements Schema<Map<K, V>> {
 
     /**
      * Creates new {@code Map} messages.
      */
-    public interface MessageFactory
-    {
+    public interface MessageFactory {
 
         /**
          * Creates a new {@link Map} message.
@@ -51,145 +49,113 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
     /**
      * A message factory for standard {@code Map} implementations.
      */
-    public enum MessageFactories implements MessageFactory
-    {
+    public enum MessageFactories implements MessageFactory {
         // defaults to HashMap
-        Map(java.util.HashMap.class)
-        {
+        Map(java.util.HashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new HashMap<K, V>();
             }
         },
         // defaults to TreeMap
-        SortedMap(java.util.TreeMap.class)
-        {
+        SortedMap(java.util.TreeMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.TreeMap<K, V>();
             }
         },
         // defaults to TreeMap
-        NavigableMap(java.util.TreeMap.class)
-        {
+        NavigableMap(java.util.TreeMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.TreeMap<K, V>();
             }
         },
-        HashMap(java.util.HashMap.class)
-        {
+        HashMap(java.util.HashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new HashMap<K, V>();
             }
         },
-        LinkedHashMap(java.util.LinkedHashMap.class)
-        {
+        LinkedHashMap(java.util.LinkedHashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.LinkedHashMap<K, V>();
             }
         },
-        TreeMap(java.util.TreeMap.class)
-        {
+        TreeMap(java.util.TreeMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.TreeMap<K, V>();
             }
         },
-        WeakHashMap(java.util.WeakHashMap.class)
-        {
+        WeakHashMap(java.util.WeakHashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.WeakHashMap<K, V>();
             }
         },
-        IdentityHashMap(java.util.IdentityHashMap.class)
-        {
+        IdentityHashMap(java.util.IdentityHashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.IdentityHashMap<K, V>();
             }
         },
-        Hashtable(java.util.Hashtable.class)
-        {
+        Hashtable(java.util.Hashtable.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.Hashtable<K, V>();
             }
         },
         // defaults to ConcurrentHashMap
-        ConcurrentMap(java.util.concurrent.ConcurrentHashMap.class)
-        {
+        ConcurrentMap(java.util.concurrent.ConcurrentHashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.concurrent.ConcurrentHashMap<K, V>();
             }
         },
-        ConcurrentHashMap(java.util.concurrent.ConcurrentHashMap.class)
-        {
+        ConcurrentHashMap(java.util.concurrent.ConcurrentHashMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.concurrent.ConcurrentHashMap<K, V>();
             }
         },
         // defaults to ConcurrentNavigableMap
-        ConcurrentNavigableMap(java.util.concurrent.ConcurrentSkipListMap.class)
-        {
+        ConcurrentNavigableMap(java.util.concurrent.ConcurrentSkipListMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.concurrent.ConcurrentSkipListMap<K, V>();
             }
         },
-        ConcurrentSkipListMap(java.util.concurrent.ConcurrentSkipListMap.class)
-        {
+        ConcurrentSkipListMap(java.util.concurrent.ConcurrentSkipListMap.class) {
             @Override
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return new java.util.concurrent.ConcurrentSkipListMap<K, V>();
             }
         },
-        Properties(java.util.Properties.class)
-        {
+        Properties(java.util.Properties.class) {
             @Override
             @SuppressWarnings("unchecked")
-            public <K, V> Map<K, V> newMessage()
-            {
+            public <K, V> Map<K, V> newMessage() {
                 return (java.util.Map<K, V>) new Properties();
             }
         };
 
         public final Class<?> typeClass;
 
-        private MessageFactories(Class<?> typeClass)
-        {
+        private MessageFactories(Class<?> typeClass) {
             this.typeClass = typeClass;
         }
 
         @Override
-        public Class<?> typeClass()
-        {
+        public Class<?> typeClass() {
             return typeClass;
         }
 
         /**
          * Returns the message factory for the standard jdk {@link Map} implementations.
          */
-        public static MessageFactories getFactory(Class<? extends Map<?, ?>> mapType)
-        {
+        public static MessageFactories getFactory(Class<? extends Map<?, ?>> mapType) {
             return mapType.getName().startsWith("java.util") ?
                     MessageFactories.valueOf(mapType.getSimpleName()) :
                     null;
@@ -198,8 +164,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
         /**
          * Returns the message factory for the standard jdk {@link Map} implementations.
          */
-        public static MessageFactories getFactory(String name)
-        {
+        public static MessageFactories getFactory(String name) {
             return MessageFactories.valueOf(name);
         }
     }
@@ -222,13 +187,11 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
      */
     public final MessageFactory messageFactory;
 
-    public MapSchema()
-    {
+    public MapSchema() {
         this(MessageFactories.HashMap);
     }
 
-    public MapSchema(MessageFactory messageFactory)
-    {
+    public MapSchema(MessageFactory messageFactory) {
         this.messageFactory = messageFactory;
     }
 
@@ -250,89 +213,77 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
      * Writes the key to the output.
      */
     protected abstract void writeKeyTo(Output output, int fieldNumber, K value,
-            boolean repeated) throws IOException;
+                                       boolean repeated) throws IOException;
 
     /**
      * Writes the value to the output.
      */
     protected abstract void writeValueTo(Output output, int fieldNumber, V value,
-            boolean repeated) throws IOException;
+                                         boolean repeated) throws IOException;
 
     /**
      * Transfers the key from the input to the output.
      */
     protected abstract void transferKey(Pipe pipe, Input input, Output output,
-            int number, boolean repeated) throws IOException;
+                                        int number, boolean repeated) throws IOException;
 
     /**
      * Transfers the value from the input to the output.
      */
     protected abstract void transferValue(Pipe pipe, Input input, Output output,
-            int number, boolean repeated) throws IOException;
+                                          int number, boolean repeated) throws IOException;
 
     @Override
-    public final String getFieldName(int number)
-    {
+    public final String getFieldName(int number) {
         return number == 1 ? FIELD_NAME_ENTRY : null;
     }
 
     @Override
-    public final int getFieldNumber(String name)
-    {
+    public final int getFieldNumber(String name) {
         return name.length() == 1 && name.charAt(0) == 'e' ? 1 : 0;
     }
 
     @Override
-    public final boolean isInitialized(Map<K, V> map)
-    {
+    public final boolean isInitialized(Map<K, V> map) {
         return true;
     }
 
     @Override
-    public final String messageFullName()
-    {
+    public final String messageFullName() {
         return Map.class.getName();
     }
 
     @Override
-    public final String messageName()
-    {
+    public final String messageName() {
         return Map.class.getSimpleName();
     }
 
     @Override
-    public final Class<? super Map<K, V>> typeClass()
-    {
+    public final Class<? super Map<K, V>> typeClass() {
         return Map.class;
     }
 
     @Override
-    public final Map<K, V> newMessage()
-    {
+    public final Map<K, V> newMessage() {
         return messageFactory.newMessage();
     }
 
     @Override
-    public final void mergeFrom(Input input, Map<K, V> map) throws IOException
-    {
+    public final void mergeFrom(Input input, Map<K, V> map) throws IOException {
         MapWrapper<K, V> entry = null;
-        for (int number = input.readFieldNumber(this);; number = input.readFieldNumber(this))
-        {
-            switch (number)
-            {
+        for (int number = input.readFieldNumber(this); ; number = input.readFieldNumber(this)) {
+            switch (number) {
                 case 0:
                     // if(entry != null)
                     // entry.value = null;
                     return;
                 case 1:
-                    if (entry == null)
-                    {
+                    if (entry == null) {
                         // lazy initialize
                         entry = new MapWrapper<K, V>(map);
                     }
 
-                    if (entry != input.mergeObject(entry, entrySchema))
-                    {
+                    if (entry != input.mergeObject(entry, entrySchema)) {
                         // an entry will always be unique
                         // it can never be a reference.
                         throw new IllegalStateException("A Map.Entry will always be " +
@@ -347,10 +298,8 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
     }
 
     @Override
-    public final void writeTo(Output output, Map<K, V> map) throws IOException
-    {
-        for (Entry<K, V> entry : map.entrySet())
-        {
+    public final void writeTo(Output output, Map<K, V> map) throws IOException {
+        for (Entry<K, V> entry : map.entrySet()) {
             // allow null keys and values.
             output.writeObject(1, entry, entrySchema, true);
         }
@@ -360,16 +309,12 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
      * The pipe schema of the {@link Map}.
      */
     public final Pipe.Schema<Map<K, V>> pipeSchema =
-            new Pipe.Schema<Map<K, V>>(MapSchema.this)
-            {
+            new Pipe.Schema<Map<K, V>>(MapSchema.this) {
                 @Override
-                protected void transfer(Pipe pipe, Input input, Output output) throws IOException
-                {
-                    for (int number = input.readFieldNumber(MapSchema.this);;
-                    number = input.readFieldNumber(MapSchema.this))
-                    {
-                        switch (number)
-                        {
+                protected void transfer(Pipe pipe, Input input, Output output) throws IOException {
+                    for (int number = input.readFieldNumber(MapSchema.this); ;
+                         number = input.readFieldNumber(MapSchema.this)) {
+                        switch (number) {
                             case 0:
                                 return;
                             case 1:
@@ -384,14 +329,11 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
 
             };
 
-    private final Schema<Entry<K, V>> entrySchema = new Schema<Entry<K, V>>()
-    {
+    private final Schema<Entry<K, V>> entrySchema = new Schema<Entry<K, V>>() {
 
         @Override
-        public final String getFieldName(int number)
-        {
-            switch (number)
-            {
+        public final String getFieldName(int number) {
+            switch (number) {
                 case 1:
                     return FIELD_NAME_KEY;
                 case 2:
@@ -402,13 +344,11 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
         }
 
         @Override
-        public final int getFieldNumber(String name)
-        {
+        public final int getFieldNumber(String name) {
             if (name.length() != 1)
                 return 0;
 
-            switch (name.charAt(0))
-            {
+            switch (name.charAt(0)) {
                 case 'k':
                     return 1;
                 case 'v':
@@ -419,63 +359,51 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
         }
 
         @Override
-        public boolean isInitialized(Entry<K, V> message)
-        {
+        public boolean isInitialized(Entry<K, V> message) {
             return true;
         }
 
         @Override
-        public String messageFullName()
-        {
+        public String messageFullName() {
             return Entry.class.getName();
         }
 
         @Override
-        public String messageName()
-        {
+        public String messageName() {
             return Entry.class.getSimpleName();
         }
 
         @Override
-        public Entry<K, V> newMessage()
-        {
+        public Entry<K, V> newMessage() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Class<? super Entry<K, V>> typeClass()
-        {
+        public Class<? super Entry<K, V>> typeClass() {
             return Entry.class;
         }
 
         @Override
-        public void mergeFrom(Input input, Entry<K, V> message) throws IOException
-        {
+        public void mergeFrom(Input input, Entry<K, V> message) throws IOException {
             // Nobody else calls this except MapSchema.mergeFrom
             final MapWrapper<K, V> wrapper = (MapWrapper<K, V>) message;
 
             K key = null;
             boolean valueRetrieved = false;
-            for (int number = input.readFieldNumber(this);;
-            number = input.readFieldNumber(this))
-            {
-                switch (number)
-                {
+            for (int number = input.readFieldNumber(this); ;
+                 number = input.readFieldNumber(this)) {
+                switch (number) {
                     case 0:
-                        if (key == null)
-                        {
+                        if (key == null) {
                             // null key (and potentially null value)
                             wrapper.map.put(null, valueRetrieved ? wrapper.value : null);
-                        }
-                        else if (!valueRetrieved)
-                        {
+                        } else if (!valueRetrieved) {
                             // null value
                             wrapper.map.put(key, null);
                         }
                         return;
                     case 1:
-                        if (key != null)
-                        {
+                        if (key != null) {
                             throw new ProtostuffException("The map was incorrectly " +
                                     "serialized.");
                         }
@@ -483,8 +411,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
                         assert key != null;
                         break;
                     case 2:
-                        if (valueRetrieved)
-                        {
+                        if (valueRetrieved) {
                             throw new ProtostuffException("The map was incorrectly " +
                                     "serialized.");
                         }
@@ -500,8 +427,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
         }
 
         @Override
-        public void writeTo(Output output, Entry<K, V> message) throws IOException
-        {
+        public void writeTo(Output output, Entry<K, V> message) throws IOException {
             if (message.getKey() != null)
                 writeKeyTo(output, 1, message.getKey(), false);
 
@@ -512,17 +438,13 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
     };
 
     private final Pipe.Schema<Entry<K, V>> entryPipeSchema =
-            new Pipe.Schema<Entry<K, V>>(entrySchema)
-            {
+            new Pipe.Schema<Entry<K, V>>(entrySchema) {
 
                 @Override
-                protected void transfer(Pipe pipe, Input input, Output output) throws IOException
-                {
-                    for (int number = input.readFieldNumber(entrySchema);;
-                    number = input.readFieldNumber(entrySchema))
-                    {
-                        switch (number)
-                        {
+                protected void transfer(Pipe pipe, Input input, Output output) throws IOException {
+                    for (int number = input.readFieldNumber(entrySchema); ;
+                         number = input.readFieldNumber(entrySchema)) {
+                        switch (number) {
                             case 0:
                                 return;
                             case 1:
@@ -543,8 +465,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
     /**
      * A {@link Map.Entry} w/c wraps a {@link Map}.
      */
-    public static final class MapWrapper<K, V> implements Entry<K, V>
-    {
+    public static final class MapWrapper<K, V> implements Entry<K, V> {
 
         /**
          * The actual map being operated on.
@@ -556,8 +477,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
          */
         V value;
 
-        MapWrapper(Map<K, V> map)
-        {
+        MapWrapper(Map<K, V> map) {
             this.map = map;
         }
 
@@ -565,8 +485,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
          * The key is provided as the last arg of {@link MapSchema#putValueFrom(Input, MapWrapper, Object)}.
          */
         @Override
-        public K getKey()
-        {
+        public K getKey() {
             return null;
         }
 
@@ -574,8 +493,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
          * Gets the last value set.
          */
         @Override
-        public V getValue()
-        {
+        public V getValue() {
             return value;
         }
 
@@ -584,8 +502,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
          * object graphs.
          */
         @Override
-        public V setValue(V value)
-        {
+        public V setValue(V value) {
             final V last = this.value;
             this.value = value;
             return last;
@@ -594,8 +511,7 @@ public abstract class MapSchema<K, V> implements Schema<Map<K, V>>
         /**
          * Puts the key-value entry.
          */
-        public void put(K key, V value)
-        {
+        public void put(K key, V value) {
             // Do not add the entry yet if the value is retrieved before the key.
             // This could happen when you're dealing with json serialized from the browser.
             if (key == null)

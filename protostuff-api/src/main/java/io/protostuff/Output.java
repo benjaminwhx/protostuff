@@ -19,12 +19,11 @@ import java.nio.ByteBuffer;
 
 /**
  * An Output lets an application write primitive data types and objects to a sink of data.
- * 
+ *
  * @author David Yu
  * @created Nov 9, 2009
  */
-public interface Output
-{
+public interface Output {
 
     /**
      * Writes a variable int field.
@@ -115,7 +114,7 @@ public interface Output
      * Writes a binary or a pre-encoded utf8 string.
      */
     public void writeByteRange(boolean utf8String, int fieldNumber, byte[] value,
-            int offset, int length, boolean repeated) throws IOException;
+                               int offset, int length, boolean repeated) throws IOException;
 
     /**
      * Writes an object(using its schema) field.

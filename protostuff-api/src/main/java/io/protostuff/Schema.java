@@ -17,73 +17,62 @@ package io.protostuff;
 import java.io.IOException;
 
 /**
- * Handles the serialization and deserialization of a message/object tied to this.
- * <p>
+ * 处理与自己绑定消息的序列化和反序列化
+ *
  * Basically, any object can be serialized via protobuf. As long as its schema is provided, it does not need to
  * implement {@link Message}. This was designed with "unobtrusive" in mind. The goal was to be able to
  * serialize/deserialize any existing object without having to touch its source. This will enable you to customize the
  * serialization of objects from 3rd party libraries.
- * 
+ *
  * @author David Yu
  * @created Nov 9, 2009
  */
-public interface Schema<T>
-{
+public interface Schema<T> {
 
     /**
-     * Gets the field name associated with the number. This is particularly useful when serializing to different formats
-     * (Eg. JSON). When using numeric field names:
-     * 
-     * <pre>
-     * return String.valueOf(number);
-     * </pre>
+     *  返回number关联的字段名，当序列化不同格式（如JSON）时特别有用
+     *  当使用数字作为字段名时，返回String.valueOf(number)
      */
     public String getFieldName(int number);
 
     /**
-     * Gets the field number associated with the name. This is particularly useful when serializing to different formats
-     * (Eg. JSON). When using numeric field names:
-     * 
-     * <pre>
-     * return Integer.parseInt(name);
-     * </pre>
+     * 返回字段名关联的字段number，当序列化不同格式（如JSON）时特别有用
+     *  当使用数字作为字段名时，返回Integer.parseInt(name);
      */
     public int getFieldNumber(String name);
 
     /**
-     * Returns true if there is no required field or if all the required fields are set.
+     * 如果没有必填字段或设置了所有必填字段，则返回true。
      */
     public boolean isInitialized(T message);
 
     /**
-     * Creates the message/object tied to this schema.
+     * 创建与此模式绑定的消息/对象。
      */
     public T newMessage();
 
     /**
-     * Returns the simple name of the message tied to this schema. Allows custom schemas to provide a custom name other
-     * than typeClass().getSimpleName();
+     * 返回与此schema绑定的简单消息名，允许自定义schema来提供不同于typeClass().getSimpleName()的名称
      */
     public String messageName();
 
     /**
-     * Returns the full name of the message tied to this schema. Allows custom schemas to provide a custom name other
-     * than typeClass().getName();
+     * 返回与此schema绑定的消息全名，允许自定义schema来提供不同于typeClass().getName()的名称
      */
     public String messageFullName();
 
     /**
-     * Gets the class of the message.
+     * 返回消息类型
      */
     public Class<? super T> typeClass();
 
     /**
-     * Deserializes a message/object from the {@link Input input}.
+     * 从input反序列化message/object
      */
     public void mergeFrom(Input input, T message) throws IOException;
 
     /**
-     * Serializes a message/object to the {@link Output output}.
+     * 序列化message/object到output
      */
     public void writeTo(Output output, T message) throws IOException;
 

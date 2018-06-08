@@ -7,8 +7,7 @@ import java.util.List;
  *
  * @author Kostiantyn Shchepanovskyi
  */
-interface FieldMap<T>
-{
+interface FieldMap<T> {
 
     Field<T> getFieldByNumber(int n);
 
