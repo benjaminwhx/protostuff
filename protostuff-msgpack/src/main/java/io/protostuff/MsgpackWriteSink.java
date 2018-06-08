@@ -46,89 +46,65 @@ import org.msgpack.core.MessagePack;
 
 /**
  * Simple wrapper around WriteSink with methods specific for MessagePacker
- * 
- * @author Alex Shvid
  *
+ * @author Alex Shvid
  */
 
-public final class MsgpackWriteSink
-{
+public final class MsgpackWriteSink {
     private final WriteSink sink;
     private final boolean str8FormatSupport;
 
-    public MsgpackWriteSink(WriteSink sink, MessagePack.PackerConfig config)
-    {
+    public MsgpackWriteSink(WriteSink sink, MessagePack.PackerConfig config) {
         this(sink, config.isStr8FormatSupport());
     }
 
-    public MsgpackWriteSink(WriteSink sink, boolean str8FormatSupport)
-    {
+    public MsgpackWriteSink(WriteSink sink, boolean str8FormatSupport) {
         this.sink = sink;
         this.str8FormatSupport = str8FormatSupport;
     }
 
     private LinkedBuffer writeByteAndByte(byte b, byte v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeByte(v, session,
                 sink.writeByte(b, session, lb));
     }
 
     private LinkedBuffer writeByteAndShort(byte b, short v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeInt16(v, session,
                 sink.writeByte(b, session, lb));
     }
 
     private LinkedBuffer writeByteAndInt(byte b, int v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeInt32(v, session,
                 sink.writeByte(b, session, lb));
     }
 
     private LinkedBuffer writeByteAndLong(byte b, long v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeInt64(v, session,
                 sink.writeByte(b, session, lb));
     }
 
     public LinkedBuffer packInt(final int r,
-            WriteSession session, LinkedBuffer lb) throws IOException
-    {
-        if (r < -(1 << 5))
-        {
-            if (r < -(1 << 15))
-            {
+                                WriteSession session, LinkedBuffer lb) throws IOException {
+        if (r < -(1 << 5)) {
+            if (r < -(1 << 15)) {
                 return writeByteAndInt(INT32, r, session, lb);
-            }
-            else if (r < -(1 << 7))
-            {
+            } else if (r < -(1 << 7)) {
                 return writeByteAndShort(INT16, (short) r, session, lb);
-            }
-            else
-            {
+            } else {
                 return writeByteAndByte(INT8, (byte) r, session, lb);
             }
-        }
-        else if (r < (1 << 7))
-        {
+        } else if (r < (1 << 7)) {
             return sink.writeByte((byte) r, session, lb);
-        }
-        else
-        {
-            if (r < (1 << 8))
-            {
+        } else {
+            if (r < (1 << 8)) {
                 return writeByteAndByte(UINT8, (byte) r, session, lb);
-            }
-            else if (r < (1 << 16))
-            {
+            } else if (r < (1 << 16)) {
                 return writeByteAndShort(UINT16, (short) r, session, lb);
-            }
-            else
-            {
+            } else {
                 // unsigned 32
                 return writeByteAndInt(UINT32, r, session, lb);
             }
@@ -136,59 +112,35 @@ public final class MsgpackWriteSink
     }
 
     public LinkedBuffer packLong(long v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (v < -(1L << 5))
-        {
-            if (v < -(1L << 15))
-            {
-                if (v < -(1L << 31))
-                {
+            throws IOException {
+        if (v < -(1L << 5)) {
+            if (v < -(1L << 15)) {
+                if (v < -(1L << 31)) {
                     return writeByteAndLong(INT64, v, session, lb);
-                }
-                else
-                {
+                } else {
                     return writeByteAndInt(INT32, (int) v, session, lb);
                 }
-            }
-            else
-            {
-                if (v < -(1 << 7))
-                {
+            } else {
+                if (v < -(1 << 7)) {
                     return writeByteAndShort(INT16, (short) v, session, lb);
-                }
-                else
-                {
+                } else {
                     return writeByteAndByte(INT8, (byte) v, session, lb);
                 }
             }
-        }
-        else if (v < (1 << 7))
-        {
+        } else if (v < (1 << 7)) {
             // fixnum
             return sink.writeByte((byte) v, session, lb);
-        }
-        else
-        {
-            if (v < (1L << 16))
-            {
-                if (v < (1 << 8))
-                {
+        } else {
+            if (v < (1L << 16)) {
+                if (v < (1 << 8)) {
                     return writeByteAndByte(UINT8, (byte) v, session, lb);
-                }
-                else
-                {
+                } else {
                     return writeByteAndShort(UINT16, (short) v, session, lb);
                 }
-            }
-            else
-            {
-                if (v < (1L << 32))
-                {
+            } else {
+                if (v < (1L << 32)) {
                     return writeByteAndInt(UINT32, (int) v, session, lb);
-                }
-                else
-                {
+                } else {
                     return writeByteAndLong(UINT64, v, session, lb);
                 }
             }
@@ -196,119 +148,85 @@ public final class MsgpackWriteSink
     }
 
     public LinkedBuffer packFloat(float v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return writeByteAndInt(FLOAT32, Float.floatToRawIntBits(v), session, lb);
     }
 
     public LinkedBuffer packDouble(double v, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return writeByteAndLong(FLOAT64, Double.doubleToRawLongBits(v), session, lb);
     }
 
     public LinkedBuffer packBoolean(boolean b, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeByte(b ? TRUE : FALSE, session, lb);
     }
 
     public LinkedBuffer packBinaryHeader(int len, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (len < (1 << 8))
-        {
+            throws IOException {
+        if (len < (1 << 8)) {
             return writeByteAndByte(BIN8, (byte) len, session, lb);
-        }
-        else if (len < (1 << 16))
-        {
+        } else if (len < (1 << 16)) {
             return writeByteAndShort(BIN16, (short) len, session, lb);
-        }
-        else
-        {
+        } else {
             return writeByteAndInt(BIN32, len, session, lb);
         }
     }
 
     public LinkedBuffer packRawStringHeader(int len, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (len < (1 << 5))
-        {
+            throws IOException {
+        if (len < (1 << 5)) {
             return sink.writeByte((byte) (FIXSTR_PREFIX | len), session, lb);
-        }
-        else if (str8FormatSupport && len < (1 << 8))
-        {
+        } else if (str8FormatSupport && len < (1 << 8)) {
             return writeByteAndByte(STR8, (byte) len, session, lb);
-        }
-        else if (len < (1 << 16))
-        {
+        } else if (len < (1 << 16)) {
             return writeByteAndShort(STR16, (short) len, session, lb);
-        }
-        else
-        {
+        } else {
             return writeByteAndInt(STR32, len, session, lb);
         }
     }
 
     public LinkedBuffer packString(CharSequence value, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (value.length() == 0)
-        {
+            throws IOException {
+        if (value.length() == 0) {
             return packRawStringHeader(0, session, lb);
         }
         int sizeInBytes = StringSerializer.computeUTF8Size(value, 0, value.length());
-        return StringSerializer.writeUTF8(value, session, 
+        return StringSerializer.writeUTF8(value, session,
                 packRawStringHeader(sizeInBytes, session, lb));
     }
 
     public LinkedBuffer packBytes(byte[] src, int offset, int length, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
+            throws IOException {
         return sink.writeByteArray(src, offset, length, session, lb);
     }
 
     public LinkedBuffer packArrayHeader(int arraySize, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (arraySize < 0)
-        {
+            throws IOException {
+        if (arraySize < 0) {
             throw new IllegalArgumentException("array size must be >= 0");
         }
 
-        if (arraySize < (1 << 4))
-        {
+        if (arraySize < (1 << 4)) {
             return sink.writeByte((byte) (FIXARRAY_PREFIX | arraySize), session, lb);
-        }
-        else if (arraySize < (1 << 16))
-        {
+        } else if (arraySize < (1 << 16)) {
             return writeByteAndShort(ARRAY16, (short) arraySize, session, lb);
-        }
-        else
-        {
+        } else {
             return writeByteAndInt(ARRAY32, arraySize, session, lb);
         }
     }
 
     public LinkedBuffer packMapHeader(int mapSize, WriteSession session, LinkedBuffer lb)
-            throws IOException
-    {
-        if (mapSize < 0)
-        {
+            throws IOException {
+        if (mapSize < 0) {
             throw new IllegalArgumentException("map size must be >= 0");
         }
 
-        if (mapSize < (1 << 4))
-        {
+        if (mapSize < (1 << 4)) {
             return sink.writeByte((byte) (FIXMAP_PREFIX | mapSize), session, lb);
-        }
-        else if (mapSize < (1 << 16))
-        {
+        } else if (mapSize < (1 << 16)) {
             return writeByteAndShort(MAP16, (short) mapSize, session, lb);
-        }
-        else
-        {
+        } else {
             return writeByteAndInt(MAP32, mapSize, session, lb);
         }
     }

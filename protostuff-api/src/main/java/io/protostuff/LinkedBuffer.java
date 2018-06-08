@@ -78,7 +78,7 @@ public final class LinkedBuffer {
     }
 
     /**
-     * Uses the existing byte array as the internal buffer.
+     * 使用已存在的byte数组作为内部的buffer
      */
     public static LinkedBuffer use(byte[] buffer, int start) {
         assert start >= 0;

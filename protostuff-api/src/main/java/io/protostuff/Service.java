@@ -8,7 +8,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Rpc service annotation, specifies service namespace.
- *
+ * <p>
  * https://github.com/protostuff/protostuff/wiki/Rpc-Services
  *
  * <p>
@@ -33,8 +33,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface Service
-{
+public @interface Service {
 
     /**
      * Service namespace.

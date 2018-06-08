@@ -35,13 +35,12 @@ import java.lang.annotation.Target;
 
 /**
  * A field annotation to configure the field ignored.
- * 
+ *
  * @author Johannes Elgh
  * @created Jul 30, 2014
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Exclude
-{
+public @interface Exclude {
 
 }
